@@ -4,9 +4,12 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -19,12 +22,13 @@ public class CoralGrabber extends SubsystemBase {
   private SparkMax neoMotor = new SparkMax(8, MotorType.kBrushless);//  might have to change
   private RelativeEncoder encoder = neoMotor.getEncoder();
   private SparkMaxConfig motorConfig = new SparkMaxConfig();
+  private SparkClosedLoopController closedLoopController = neoMotor.getClosedLoopController();
   /** Creates a new CoralGrabber. */
   public CoralGrabber() {
     neoConfigs();
   }
 
-  public void neoConfigs() {
+  private void neoConfigs() {
     neoMotor.clearFaults();
     motorConfig.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -35,6 +39,7 @@ public class CoralGrabber extends SubsystemBase {
       .p(0.00001, ClosedLoopSlot.kSlot1)
       .i(0, ClosedLoopSlot.kSlot1)
       .d(0, ClosedLoopSlot.kSlot1);
+      closedLoopController.setReference(30, ControlType.kCurrent);
   }
 
   public double getEncoderPosition() {

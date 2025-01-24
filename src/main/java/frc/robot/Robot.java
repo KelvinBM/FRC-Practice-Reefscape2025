@@ -7,9 +7,14 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Limelight;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -17,13 +22,26 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   private final boolean kUseLimelight = false;
+  public static NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+  public static NetworkTableEntry ta = table.getEntry("ta");
+  public static NetworkTableEntry tx = table.getEntry("tx");
+  public static NetworkTableEntry ty = table.getEntry("ty");
+  public static NetworkTableEntry tv = table.getEntry("tv");
 
   public Robot() {
     m_robotContainer = new RobotContainer();
   }
 
   @Override
+  public void robotInit() {
+    table.getEntry("pipeline").setNumber(0);
+  }
+
+  @Override
   public void robotPeriodic() {
+    SmartDashboard.putBoolean("Has Target", (tv.getDouble(0.0) == 1) ? true : false);
+    SmartDashboard.putNumber("Limelight Y", ty.getDouble(0.0));
+    SmartDashboard.putNumber("Distance to Target", Limelight.getTargetDistance());
     CommandScheduler.getInstance().run();
 
     /*

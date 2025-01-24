@@ -233,6 +233,33 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
+    public Command getInRange(CommandSwerveDrivetrain drivetrain, boolean hasTarget, double distanceFromTarget, double desiredDistance) {
+        return run(() -> {
+            if(!hasTarget)
+                System.out.println("Target acquired");
+
+            SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
+
+            if(distanceFromTarget < desiredDistance) {
+                while(distanceFromTarget < desiredDistance) {
+                    drivetrain.applyRequest(() ->
+                        drive.withVelocityX(0.25) // Drive forward with negative Y (forward)
+                            .withVelocityY(0) // Drive left with negative X (left)
+                            .withRotationalRate(0)
+                    );
+                }
+            } else if(distanceFromTarget > desiredDistance) {
+                while(distanceFromTarget < desiredDistance) {
+                    drivetrain.applyRequest(() ->
+                        drive.withVelocityX(-0.25) // Drive forward with negative Y (forward)
+                            .withVelocityY(0) // Drive left with negative X (left)
+                            .withRotationalRate(0)
+                    );
+                }
+            }        
+        });
+    }
+
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine
      * specified by {@link #m_sysIdRoutineToApply}.
