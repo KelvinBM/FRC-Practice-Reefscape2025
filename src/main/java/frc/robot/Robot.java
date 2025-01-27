@@ -22,28 +22,16 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   private final boolean kUseLimelight = false;
-  public static NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-  public static NetworkTableEntry ta = table.getEntry("ta");
-  public static NetworkTableEntry tx = table.getEntry("tx");
-  public static NetworkTableEntry ty = table.getEntry("ty");
-  public static NetworkTableEntry tv = table.getEntry("tv");
 
   public Robot() {
     m_robotContainer = new RobotContainer();
   }
 
   @Override
-  public void robotInit() {
-    table.getEntry("pipeline").setNumber(0);
-  }
+  public void robotInit() {}
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putBoolean("Has Target", (tv.getDouble(0.0) == 1) ? true : false);
-    SmartDashboard.putNumber("Limelight Y", ty.getDouble(0.0));
-    SmartDashboard.putNumber("Distance to Target", Limelight.getTargetDistance());
-    CommandScheduler.getInstance().run();
-
     /*
      * This example of adding Limelight is very simple and may not be sufficient for on-field use.
      * Users typically need to provide a standard deviation that scales with the distance to target
