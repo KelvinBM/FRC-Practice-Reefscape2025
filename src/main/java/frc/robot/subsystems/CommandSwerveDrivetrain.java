@@ -240,30 +240,53 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param desiredDistance distance in inches from the target at which robot should stop
      * @return distance to target
      */
-    public Command getInRange(CommandSwerveDrivetrain drivetrain, double desiredDistance) {
+    public Command getInRange(CommandSwerveDrivetrain drivetrain, double desiredDistance, double speed) {
         return run(() -> {
             if(Limelight.hasValidTarget()) {
-                System.out.println("Target acquired");
+                System.out.println("Target acquired -> will try driving to target");
 
                 SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
 
                 
                 while(Limelight.getTargetDistance() < desiredDistance) {
                     drivetrain.applyRequest(() ->
-                        drive.withVelocityX(0.25) // Drive forward with negative Y (forward)
+                        drive.withVelocityX(speed) // Drive forward with negative Y (forward)
                             .withVelocityY(0) // Drive left with negative X (left)
                             .withRotationalRate(0)
                     );
                 }
                 while(Limelight.getTargetDistance() < desiredDistance) {
                     drivetrain.applyRequest(() ->
-                        drive.withVelocityX(-0.25) // Drive forward with negative Y (forward)
+                        drive.withVelocityX(-speed) // Drive forward with negative Y (forward)
+                            // these two below may not be needed for this command
                             .withVelocityY(0) // Drive left with negative X (left)
                             .withRotationalRate(0)
                     );
                 }
             }       
         });
+    }
+
+    public Command findTarget(CommandSwerveDrivetrain drivetrain, double speed) {// can make one button search to the left and another to the right
+        return run(() -> {
+            String direction = (speed > 0) ? "RIGHT" : "LEFT";
+            SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
+            while(!Limelight.hasValidTarget()) {
+                System.out.println("Searching for target -> " + direction);
+                drivetrain.applyRequest(() ->
+                    drive.withRotationalRate(speed)// may not need other withVelocity methods
+                );
+            }
+        });
+    }
+
+    public Command stopSwerve(CommandSwerveDrivetrain drivetrain) {
+        SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
+        return run(() -> drivetrain.applyRequest(() ->
+            drive.withVelocityX(0)
+                .withVelocityY(0)
+                .withRotationalRate(0)
+        ));
     }
 
     /**

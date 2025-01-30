@@ -70,7 +70,10 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
-        joystick.y().whileFalse(drivetrain.getInRange(drivetrain, 10.25));// modify distance
+        joystick.y().whileTrue(drivetrain.getInRange(drivetrain, 10.25, 0.25));// modify distance (2nd param)
+        joystick.x().whileTrue(drivetrain.findTarget(drivetrain, 0.25));
+
+        joystick.rightBumper().onTrue(drivetrain.stopSwerve(drivetrain));
 
         joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(0.5).withVelocityY(0))
