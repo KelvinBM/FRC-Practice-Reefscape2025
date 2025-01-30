@@ -71,7 +71,7 @@ public class RobotContainer {
         ));
 
         joystick.y().whileTrue(drivetrain.getInRange(drivetrain, 10.25, 0.25));// modify distance (2nd param)
-        joystick.x().whileTrue(drivetrain.findTarget(drivetrain, 0.25));
+        joystick.x().whileTrue(drivetrain.findTarget(drivetrain, 0.25));// try negative number
 
         joystick.rightBumper().onTrue(drivetrain.stopSwerve(drivetrain));
 
