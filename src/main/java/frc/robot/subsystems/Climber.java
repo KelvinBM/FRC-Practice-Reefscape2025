@@ -8,6 +8,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -22,8 +24,8 @@ public class Climber extends SubsystemBase {
 
     climber.configure(
       climberConfig.inverted(false),
-        null,
-      null
+        ResetMode.kNoResetSafeParameters,
+        PersistMode.kPersistParameters
     );
   }
 
