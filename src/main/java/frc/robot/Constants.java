@@ -20,5 +20,14 @@ public final class Constants {
         public static final int CORAL_ADJUST_MOTOR_ID = 8;
         public static final int CORAL_MOTOR_RIGHT_ID = 0;
         public static final int CORAL_MOTOR_LEFT_ID = 0;
+        public static final int BEAM_BREAKER_PORT = 0;
+        public static final int LIMIT_SWITCH_UP_PORT = 0;
+        public static final int LIMIT_SWITCH_DOWN_PORT = 0;
+        public static final int LIMIT_SWITCH_CORAL_PORT = 0;
+    }
+
+    public static final class ElevatorConstants {
+        public static final int ELEVATOR_TOP_MOTOR_ID = 0;
+        public static final int ELEVATOR_BOTTOM_MOTOR_ID = 0;
     }
 }
