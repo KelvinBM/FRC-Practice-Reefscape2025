@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -28,16 +29,16 @@ public class Elevator extends SubsystemBase {
   private SparkMax elevatorMotor_Right = new SparkMax(ElevatorConstants.ELEVATOR_BOTTOM_MOTOR_ID, MotorType.kBrushless);
 
   // configs
-  private SparkMaxConfig elevatorTopConfig = new SparkMaxConfig();
-  private SparkMaxConfig elevatorBottomConfig = new SparkMaxConfig();
+  private SparkMaxConfig elevatorRightConfig = new SparkMaxConfig();
+  private SparkMaxConfig elevatorLeftConfig = new SparkMaxConfig();
 
   // encoders
   private RelativeEncoder rightMotorEncoder = elevatorMotor_Right.getEncoder();
   private RelativeEncoder leftMotorEncoder = elevatorMotor_Left.getEncoder();
 
   // closedloop
-  private SparkClosedLoopController topClosedLoopController =  elevatorMotor_Right.getClosedLoopController();
-  private SparkClosedLoopController bottomClosedLoopController =  elevatorMotor_Left.getClosedLoopController();
+  private SparkClosedLoopController rightClosedLoopController =  elevatorMotor_Right.getClosedLoopController();
+  private SparkClosedLoopController leftClosedLoopController =  elevatorMotor_Left.getClosedLoopController();
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -49,38 +50,48 @@ public class Elevator extends SubsystemBase {
     elevatorMotor_Right.clearFaults();
     elevatorMotor_Left.clearFaults();
 
-    topClosedLoopController.setReference(30, ControlType.kCurrent);
-    bottomClosedLoopController.setReference(30, ControlType.kCurrent);
+    leftClosedLoopController
+      .setReference(30, ControlType.kCurrent);
+    
+    rightClosedLoopController
+      .setReference(30, ControlType.kCurrent);
 
-    elevatorTopConfig.inverted(false)// may have to change
+    elevatorRightConfig.inverted(false)// may have to change
       .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(35);
-    elevatorBottomConfig.inverted(true)// may have to change
-      .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(35);
+      .smartCurrentLimit(35)
+      .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .p(0.1)// right pid
+      .d(0);
 
-    elevatorMotor_Right.configure(elevatorTopConfig,
+    elevatorLeftConfig.inverted(true)// may have to change
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(35)
+      .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .p(0.1)// left pid
+      .d(0);
+
+    elevatorMotor_Right.configure(elevatorRightConfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kPersistParameters);
-    elevatorMotor_Left.configure(elevatorBottomConfig,
+    elevatorMotor_Left.configure(elevatorLeftConfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kPersistParameters);
   }
 
   public void setToBrakeMode() {
-    elevatorTopConfig.idleMode(IdleMode.kBrake);
-    elevatorBottomConfig.idleMode(IdleMode.kBrake);
+    elevatorRightConfig.idleMode(IdleMode.kBrake);
+    elevatorLeftConfig.idleMode(IdleMode.kBrake);
      
-    elevatorMotor_Right.configure(elevatorTopConfig, null, null);
-    elevatorMotor_Left.configure(elevatorBottomConfig, null, null);
+    elevatorMotor_Right.configure(elevatorRightConfig, null, null);
+    elevatorMotor_Left.configure(elevatorLeftConfig, null, null);
   }
 
   public void setToCoastMode() {
-    elevatorTopConfig.idleMode(IdleMode.kCoast);
-    elevatorBottomConfig.idleMode(IdleMode.kCoast);
+    elevatorRightConfig.idleMode(IdleMode.kCoast);
+    elevatorLeftConfig.idleMode(IdleMode.kCoast);
      
-    elevatorMotor_Right.configure(elevatorTopConfig, null, null);
-    elevatorMotor_Left.configure(elevatorBottomConfig, null, null);
+    elevatorMotor_Right.configure(elevatorRightConfig, null, null);
+    elevatorMotor_Left.configure(elevatorLeftConfig, null, null);
   }
 
   public double getRightEncoderPosition() {

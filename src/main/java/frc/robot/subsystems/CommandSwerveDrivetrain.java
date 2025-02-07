@@ -27,7 +27,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.Constants;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -235,29 +236,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     /**
-     * @param drivetrain drivetrain object to use
-     * @param hasTarget if limelight has acquired a valid target
-     * @param desiredDistance distance in inches from the target at which robot should stop
-     * @return distance to target
+     * 
+     * @param driveRobotCentric
+     * @param desiredDistance
+     * @param speed
+     * @return
      */
-    public Command getInRange(CommandSwerveDrivetrain drivetrain, double desiredDistance, double speed) {
+    public Command getInRange(SwerveRequest.RobotCentric driveRobotCentric, double desiredDistance, double speed) {
         return run(() -> {
             if(Limelight.hasValidTarget()) {
                 System.out.println("Target acquired -> will try driving to target");
-
-                SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric();
-
+                double distanceWithOffset = desiredDistance - LimelightConstants.kDesiredDistanceOffset_Inches;
                 
-                while(Limelight.getTargetDistance() < desiredDistance) {
-                    drivetrain.applyRequest(() ->
-                        drive.withVelocityX(speed) // Drive forward with negative Y (forward)
+                if(Limelight.getTargetDistance() < distanceWithOffset) {
+                    this.applyRequest(() ->
+                        driveRobotCentric.withVelocityX(speed) // Drive forward with negative Y (forward)
                             .withVelocityY(0) // Drive left with negative X (left)
                             .withRotationalRate(0)
                     );
                 }
-                while(Limelight.getTargetDistance() < desiredDistance) {
-                    drivetrain.applyRequest(() ->
-                        drive.withVelocityX(-speed) // Drive forward with negative Y (forward)
+                if(Limelight.getTargetDistance() > distanceWithOffset) {
+                    this.applyRequest(() ->
+                        driveRobotCentric.withVelocityX(-speed) // Drive forward with negative Y (forward)
                             // these two below may not be needed for this command
                             .withVelocityY(0) // Drive left with negative X (left)
                             .withRotationalRate(0)
@@ -267,26 +267,80 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
     }
 
-    public Command findTarget(CommandSwerveDrivetrain drivetrain, double speed) {// can make one button search to the left and another to the right
+    public Command alignRobotToCenter(SwerveRequest.RobotCentric driveRobotCentric, double speed) {
+        return run(() -> {
+            if(Limelight.hasValidTarget()) {
+                System.out.println("Target acquired --> align robot");
+        
+                if(Limelight.getTableValue("tx") > 5) { // verify if working correctly
+                    this.applyRequest(() -> 
+                        driveRobotCentric
+                            .withRotationalRate(0.15)
+                    );
+                    if(Limelight.getTargetDistance() > 10) {
+                        this.applyRequest(() -> 
+                            driveRobotCentric
+                            .withVelocityY(-0.20) // Y -> left to right
+                        );
+                    }
+                    if(Limelight.getTargetDistance() < 10) {
+                        this.applyRequest(() -> 
+                            driveRobotCentric
+                            .withVelocityY(0.20) // Y -> left to right
+                        );
+                    }
+                }
+                if(Limelight.getTableValue("tx") < 5) { // verify if working correctly
+                    this.applyRequest(() -> 
+                        driveRobotCentric
+                            .withRotationalRate(-0.15)
+                    );
+                    if(Limelight.getTargetDistance() > 10) {
+                        this.applyRequest(() -> 
+                            driveRobotCentric
+                            .withVelocityY(-0.20) // Y -> left to right
+                        );
+                    }
+                    if(Limelight.getTargetDistance() < 10) {
+                        this.applyRequest(() -> 
+                            driveRobotCentric
+                            .withVelocityY(0.20) // Y -> left to right
+                        );
+                    }
+                }            
+            } 
+        });
+    }
+
+    /**
+     * Give positive speed to turn right, and negative to turn left
+     * 
+     * @param speed
+     * @return
+     */
+    public Command findTarget(SwerveRequest.RobotCentric driveRobotCentric, double speed) {// can make one button search to the left and another to the right
         return run(() -> {
             String direction = (speed > 0) ? "RIGHT" : "LEFT";
-            SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
-            while(!Limelight.hasValidTarget()) {
+            if(Limelight.hasValidTarget()) {
                 System.out.println("Searching for target -> " + direction);
-                drivetrain.applyRequest(() ->
-                    drive.withRotationalRate(speed)// may not need other withVelocity methods
+                this.applyRequest(() ->
+                    driveRobotCentric.withRotationalRate(speed)// may not need other withVelocity methods
                 );
             }
         });
     }
 
-    public Command stopSwerve(CommandSwerveDrivetrain drivetrain) {
-        SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric();
-        return run(() -> drivetrain.applyRequest(() ->
-            drive.withVelocityX(0)
+    /**
+     * 
+     * @param driveFieldCentric
+     * @return
+     */
+    public Command stopSwerve(SwerveRequest.FieldCentric driveFieldCentric) {
+        return this.applyRequest(() ->
+            driveFieldCentric.withVelocityX(0)
                 .withVelocityY(0)
                 .withRotationalRate(0)
-        ));
+        );
     }
 
     /**

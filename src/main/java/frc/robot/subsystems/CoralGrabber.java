@@ -77,21 +77,15 @@ public class CoralGrabber extends SubsystemBase {
 
     coralAdjustConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0.4)
+        .p(0.1)
         .i(0)
         .d(0)
         .outputRange(-1, 1);
     coralRightConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0)
-        .i(0)
-        .d(0)
         .outputRange(-1, 1);
     coralLeftConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(0)
-        .i(0)
-        .d(0)
         .outputRange(-1, 1);
 
     coralAdjustMotor.configure(coralAdjustConfig,

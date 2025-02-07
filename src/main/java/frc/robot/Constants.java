@@ -11,6 +11,7 @@ public final class Constants {
         public static final double CAMERA_HEIGHT_INCHES = 0;// height of cam from floor
         public static final double CAMERA_MOUNT_ANGLE_DEG = 0;// angle from center of camera to the floor
         public static final double CAMERA_TO_EDGE_OF_ROBOT_INCHES = 0;
+        public static final double kDesiredDistanceOffset_Inches = 20;
     }
 
     // driving adjust
