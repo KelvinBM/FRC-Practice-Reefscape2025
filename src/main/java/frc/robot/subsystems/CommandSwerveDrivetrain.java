@@ -267,7 +267,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
     }
 
-    public Command alignRobotToCenter(SwerveRequest.RobotCentric driveRobotCentric, double speed) {
+    public Command moveToAndFaceTarget(SwerveRequest.RobotCentric driveRobotCentric, double speed) {
         return run(() -> {
             if(Limelight.hasValidTarget()) {
                 System.out.println("Target acquired --> align robot");
