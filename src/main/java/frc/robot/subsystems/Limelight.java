@@ -10,6 +10,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 
 public class Limelight extends SubsystemBase {
   /* Can't access limelight as table object */
@@ -47,6 +48,8 @@ public class Limelight extends SubsystemBase {
     return (getTableValue("tv") == 1) ? true : false;
   }
 
+
+
   public static double getTargetDistance() {
 
     double angleToGoalDegrees = Constants.LimelightConstants.CAMERA_MOUNT_ANGLE_DEG + getTableValue("ty");
@@ -58,12 +61,25 @@ public class Limelight extends SubsystemBase {
     return distanceToTarget;
   }
 
+  public static double getTargetDistanceUsingLimelightHelper() {
+
+    double angleToGoalDegrees = Constants.LimelightConstants.CAMERA_MOUNT_ANGLE_DEG + LimelightHelpers.getLimelightNTDouble("limelight", "ty");
+    double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180);
+    double distanceFromLimelightToGoalInches = (Constants.LimelightConstants.GOAL_HEIGHT_INCHES - Constants.LimelightConstants.CAMERA_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);
+
+    double distanceToTarget = distanceFromLimelightToGoalInches - Constants.LimelightConstants.CAMERA_TO_EDGE_OF_ROBOT_INCHES;
+
+    return distanceToTarget;
+  }
+
   public static void putLimelightValuesInDashboard() {
     SmartDashboard.putNumber("Limelight Y", getTableValue("ty"));
+    SmartDashboard.putNumber("LimelightHelpers Y", LimelightHelpers.getLimelightNTDouble("limelight", "ty"));
     SmartDashboard.putNumber("Limelight X", getTableValue("tx"));
     SmartDashboard.putNumber("Limelight Area", getTableValue("ta"));
     SmartDashboard.putBoolean("Has Target", hasValidTarget());
     SmartDashboard.putNumber("Target Distance", getTargetDistance());
+    SmartDashboard.putNumber("Distance (Limelight Helpers)", getTargetDistanceUsingLimelightHelper());
   }
   
   @Override

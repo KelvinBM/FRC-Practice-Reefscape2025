@@ -1,7 +1,5 @@
 package frc.robot.Utils;
 
-import frc.robot.generated.TunerConstants;
-
 public class EncoderUtils {
     /**
      * 

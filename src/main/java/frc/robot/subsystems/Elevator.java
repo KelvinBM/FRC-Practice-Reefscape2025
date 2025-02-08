@@ -125,7 +125,7 @@ public class Elevator extends SubsystemBase {
   }
 
   //---------- ELEVATOR METHODS ----------//
-  public void goToFirstLevel(double setpoint) { // remove param 'setpoint' after figuring it out
+  public void goToFirstLevel_Pid(double setpoint) { // remove param 'setpoint' after figuring it out
     if(leftMotorEncoder.getPosition() < setpoint) {
       double speed = pidForElevator(leftMotorEncoder.getPosition(), setpoint);
       elevatorMotor_Right.set(speed);

@@ -23,11 +23,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -267,44 +265,49 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         });
     }
 
-    public Command moveToAndFaceTarget(SwerveRequest.RobotCentric driveRobotCentric, double speed) {
+    public Command moveToAndFaceTarget(SwerveRequest.RobotCentric driveRobotCentric, double speed, double desiredDistanceFromTags) {
         return run(() -> {
             if(Limelight.hasValidTarget()) {
                 System.out.println("Target acquired --> align robot");
+                double distanceWithOffset = desiredDistanceFromTags + 5;
         
                 if(Limelight.getTableValue("tx") > 5) { // verify if working correctly
                     this.applyRequest(() -> 
                         driveRobotCentric
                             .withRotationalRate(0.15)
                     );
-                    if(Limelight.getTargetDistance() > 10) {
+                    if(Limelight.getTargetDistance() > distanceWithOffset) {// use 10 maybe
                         this.applyRequest(() -> 
                             driveRobotCentric
-                            .withVelocityY(-0.20) // Y -> left to right
+                            .withVelocityY(-0.15) // Y -> left to right
+                            .withVelocityX(-0.10)
                         );
                     }
-                    if(Limelight.getTargetDistance() < 10) {
+                    if(Limelight.getTargetDistance() < distanceWithOffset) {
                         this.applyRequest(() -> 
                             driveRobotCentric
-                            .withVelocityY(0.20) // Y -> left to right
+                            .withVelocityY(-0.15) // Y -> left to right
+                            .withVelocityX(0.10)
                         );
                     }
                 }
                 if(Limelight.getTableValue("tx") < 5) { // verify if working correctly
                     this.applyRequest(() -> 
                         driveRobotCentric
-                            .withRotationalRate(-0.15)
+                            .withRotationalRate(0.15)
                     );
-                    if(Limelight.getTargetDistance() > 10) {
+                    if(Limelight.getTargetDistance() > distanceWithOffset) {
                         this.applyRequest(() -> 
                             driveRobotCentric
-                            .withVelocityY(-0.20) // Y -> left to right
+                            .withVelocityY(0.15) // Y -> left to right
+                            .withVelocityX(-0.10)
                         );
                     }
-                    if(Limelight.getTargetDistance() < 10) {
+                    if(Limelight.getTargetDistance() < distanceWithOffset) {
                         this.applyRequest(() -> 
                             driveRobotCentric
-                            .withVelocityY(0.20) // Y -> left to right
+                            .withVelocityY(0.15) // Y -> left to right
+                            .withVelocityX(0.10)
                         );
                     }
                 }            
@@ -341,6 +344,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 .withVelocityY(0)
                 .withRotationalRate(0)
         );
+    }
+    
+    public Command stopSwerveUsingBrake(SwerveRequest.SwerveDriveBrake brake) {
+        return this.applyRequest(() -> brake);
     }
 
     /**

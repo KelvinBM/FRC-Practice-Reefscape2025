@@ -1,5 +1,6 @@
 package frc.robot;
 
+
 public final class Constants {
 
     public static double ClimberInitialSpeed = 0.4;
@@ -30,5 +31,19 @@ public final class Constants {
     public static final class ElevatorConstants {
         public static final int ELEVATOR_TOP_MOTOR_ID = 0;
         public static final int ELEVATOR_BOTTOM_MOTOR_ID = 0;
+    }
+
+    public static final class OperatorConstants {
+        public static final int BUTTON_BOARD_PORT = 0;
+        public static final int GRAB_CORAL_PORT = 0;
+        public static final int RELEASE_CORAL_PORT = 0;
+        public static final int GRAB_ALGAE_PORT = 0;
+        public static final int RELEASE_ALGAE_PORT = 0;
+        public static final int CLIMB_PORT = 0;
+        public static final int LOWER_ROBOT_PORT = 0;
+        public static final int LEVEL_1_SCORE_PORT = 0;
+        public static final int LEVEL_2_SCORE_PORT = 0;
+        public static final int LEVEL_4_SCORE_PORT = 0;
+        public static final int LEVEL_3_SCORE_PORT = 0;
     }
 }

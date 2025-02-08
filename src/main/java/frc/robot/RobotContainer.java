@@ -12,11 +12,15 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.OperatorConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Limelight;
@@ -40,6 +44,11 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final Joystick buttonBoard = new Joystick(OperatorConstants.BUTTON_BOARD_PORT);
+    // CommandJoystick j = new CommandJoystick(1);
+
+    private final JoystickButton grabCoral, releaseCoral, grabAlgae, releaseAlgae, climb, 
+                                lower, level_1_Score, level_2_Score, level_3_Score, level_4_Score;
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Limelight limelight;
@@ -52,6 +61,17 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
         limelight = new Limelight();
+        grabCoral = new JoystickButton(buttonBoard, OperatorConstants.GRAB_CORAL_PORT);
+        releaseCoral = new JoystickButton(buttonBoard, OperatorConstants.RELEASE_CORAL_PORT);
+        grabAlgae = new JoystickButton(buttonBoard, OperatorConstants.GRAB_ALGAE_PORT);
+        releaseAlgae = new JoystickButton(buttonBoard, OperatorConstants.RELEASE_ALGAE_PORT);
+        climb = new JoystickButton(buttonBoard, OperatorConstants.CLIMB_PORT);
+        lower = new JoystickButton(buttonBoard, OperatorConstants.LOWER_ROBOT_PORT);
+        level_1_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_1_SCORE_PORT);
+        level_2_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_2_SCORE_PORT);
+        level_3_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_3_SCORE_PORT);
+        level_4_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_4_SCORE_PORT);
+        
 
         configureBindings();
     }
@@ -76,7 +96,9 @@ public class RobotContainer {
         joystick.y().whileTrue(drivetrain.getInRange(driveRobotCentric, 10.25, 0.25));// modify distance (2nd param)
         joystick.x().whileTrue(drivetrain.findTarget(driveRobotCentric, 0.25));// try negative number
 
+        // joystick.rightBumper().onTrue(drivetrain.stopSwerveUsingBrake(brake));
         joystick.rightBumper().onTrue(drivetrain.stopSwerve(driveFieldCentric));
+
 
         joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(0.5).withVelocityY(0))
