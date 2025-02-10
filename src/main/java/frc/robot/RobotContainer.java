@@ -45,10 +45,12 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final Joystick buttonBoard = new Joystick(OperatorConstants.BUTTON_BOARD_PORT);
-    // CommandJoystick j = new CommandJoystick(1);
+    private final CommandJoystick commandButtonBoard = new CommandJoystick(1);
 
-    private final JoystickButton grabCoral, releaseCoral, grabAlgae, releaseAlgae, climb, 
-                                lower, level_1_Score, level_2_Score, level_3_Score, level_4_Score;
+    private final JoystickButton elevatorUp, elevatorDown, algaeUp, algeaDown,
+                                algeaCollect, algeaRelease, coralGrab, coralRelease, 
+                                stopAll;
+
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Limelight limelight;
@@ -61,17 +63,17 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
         limelight = new Limelight();
-        grabCoral = new JoystickButton(buttonBoard, OperatorConstants.GRAB_CORAL_PORT);
-        releaseCoral = new JoystickButton(buttonBoard, OperatorConstants.RELEASE_CORAL_PORT);
-        grabAlgae = new JoystickButton(buttonBoard, OperatorConstants.GRAB_ALGAE_PORT);
-        releaseAlgae = new JoystickButton(buttonBoard, OperatorConstants.RELEASE_ALGAE_PORT);
-        climb = new JoystickButton(buttonBoard, OperatorConstants.CLIMB_PORT);
-        lower = new JoystickButton(buttonBoard, OperatorConstants.LOWER_ROBOT_PORT);
-        level_1_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_1_SCORE_PORT);
-        level_2_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_2_SCORE_PORT);
-        level_3_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_3_SCORE_PORT);
-        level_4_Score = new JoystickButton(buttonBoard, OperatorConstants.LEVEL_4_SCORE_PORT);
-        
+
+        // buttons
+        elevatorUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);
+        elevatorDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);
+        algaeUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_2); 
+        algeaDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);
+        algeaCollect = new JoystickButton(buttonBoard, OperatorConstants.PORT_3); 
+        algeaRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_6);
+        coralGrab = new JoystickButton(buttonBoard, OperatorConstants.PORT_7); 
+        coralRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_9);
+        stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_10);
 
         configureBindings();
     }

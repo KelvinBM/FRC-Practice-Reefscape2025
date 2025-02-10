@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
@@ -25,20 +26,20 @@ public class Elevator extends SubsystemBase {
   private final double kP = 0.1;
 
   // motors
-  private SparkMax elevatorMotor_Left = new SparkMax(ElevatorConstants.ELEVATOR_TOP_MOTOR_ID, MotorType.kBrushless);
-  private SparkMax elevatorMotor_Right = new SparkMax(ElevatorConstants.ELEVATOR_BOTTOM_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax elevatorLeftMotor = new SparkMax(ElevatorConstants.ELEVATOR_TOP_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax elevatorRightMotor = new SparkMax(ElevatorConstants.ELEVATOR_BOTTOM_MOTOR_ID, MotorType.kBrushless);
 
   // configs
   private SparkMaxConfig elevatorRightConfig = new SparkMaxConfig();
   private SparkMaxConfig elevatorLeftConfig = new SparkMaxConfig();
 
   // encoders
-  private RelativeEncoder rightMotorEncoder = elevatorMotor_Right.getEncoder();
-  private RelativeEncoder leftMotorEncoder = elevatorMotor_Left.getEncoder();
+  private RelativeEncoder rightMotorEncoder = elevatorRightMotor.getEncoder();
+  private RelativeEncoder leftMotorEncoder = elevatorLeftMotor.getEncoder();
 
   // closedloop
-  private SparkClosedLoopController rightClosedLoopController =  elevatorMotor_Right.getClosedLoopController();
-  private SparkClosedLoopController leftClosedLoopController =  elevatorMotor_Left.getClosedLoopController();
+  private SparkClosedLoopController rightClosedLoopController =  elevatorRightMotor.getClosedLoopController();
+  private SparkClosedLoopController leftClosedLoopController =  elevatorLeftMotor.getClosedLoopController();
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -47,8 +48,8 @@ public class Elevator extends SubsystemBase {
   }
 
   public void elevatorMotorConfigs() {
-    elevatorMotor_Right.clearFaults();
-    elevatorMotor_Left.clearFaults();
+    elevatorRightMotor.clearFaults();
+    elevatorLeftMotor.clearFaults();
 
     leftClosedLoopController
       .setReference(30, ControlType.kCurrent);
@@ -70,10 +71,10 @@ public class Elevator extends SubsystemBase {
       .p(0.1)// left pid
       .d(0);
 
-    elevatorMotor_Right.configure(elevatorRightConfig,
+    elevatorRightMotor.configure(elevatorRightConfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kPersistParameters);
-    elevatorMotor_Left.configure(elevatorLeftConfig,
+    elevatorLeftMotor.configure(elevatorLeftConfig,
       ResetMode.kNoResetSafeParameters,
       PersistMode.kPersistParameters);
   }
@@ -81,17 +82,11 @@ public class Elevator extends SubsystemBase {
   public void setToBrakeMode() {
     elevatorRightConfig.idleMode(IdleMode.kBrake);
     elevatorLeftConfig.idleMode(IdleMode.kBrake);
-     
-    elevatorMotor_Right.configure(elevatorRightConfig, null, null);
-    elevatorMotor_Left.configure(elevatorLeftConfig, null, null);
   }
 
   public void setToCoastMode() {
     elevatorRightConfig.idleMode(IdleMode.kCoast);
     elevatorLeftConfig.idleMode(IdleMode.kCoast);
-     
-    elevatorMotor_Right.configure(elevatorRightConfig, null, null);
-    elevatorMotor_Left.configure(elevatorLeftConfig, null, null);
   }
 
   public double getRightEncoderPosition() {
@@ -103,8 +98,8 @@ public class Elevator extends SubsystemBase {
   }
 
   public void putElevatorValuesInSmartDashboard() {
-    SmartDashboard.putNumber("Elevator Right Position Value", getRightEncoderPosition());
-    SmartDashboard.putNumber("Elevator Left Postion Value", getLeftEncoderPosition());
+    SmartDashboard.putNumber("Elevator Right Position", getRightEncoderPosition());
+    SmartDashboard.putNumber("Elevator Left Postion", getLeftEncoderPosition());
   }
 
   public void resetMotorsEncoderPosition() {
@@ -128,8 +123,8 @@ public class Elevator extends SubsystemBase {
   public void goToFirstLevel_Pid(double setpoint) { // remove param 'setpoint' after figuring it out
     if(leftMotorEncoder.getPosition() < setpoint) {
       double speed = pidForElevator(leftMotorEncoder.getPosition(), setpoint);
-      elevatorMotor_Right.set(speed);
-      elevatorMotor_Left.set(speed);
+      elevatorRightMotor.set(speed);
+      elevatorLeftMotor.set(speed);
     } else
       stopAllMotors();
   }
@@ -138,16 +133,16 @@ public class Elevator extends SubsystemBase {
     final double setpoint = 5;
     if(getRightEncoderPosition() > setpoint) {
       double speed = pidForElevator(leftMotorEncoder.getPosition(), setpoint);
-      elevatorMotor_Left.set(-speed);
-      elevatorMotor_Right.set(-speed);
+      elevatorLeftMotor.set(-speed);
+      elevatorRightMotor.set(-speed);
     } else
       stopAllMotors();
   }
 
 
   public void stopAllMotors() {
-    elevatorMotor_Right.stopMotor();
-    elevatorMotor_Left.stopMotor();
+    elevatorRightMotor.stopMotor();
+    elevatorLeftMotor.stopMotor();
   }
 
   /* create methods for elevator */
@@ -155,6 +150,30 @@ public class Elevator extends SubsystemBase {
   //   if(bottomMotorEncoder.getPosition() < 10)
   //     elevatorMotor_Bottom.set(speed);
   // }
+
+  /***** COMMANDS *****/
+  //implement encoder position
+  public Command elevatorUpCommand(double speed) {
+    return run(() -> {
+      elevatorLeftMotor.set(speed);
+      elevatorRightMotor.set(speed);
+    });
+  }
+
+  // implement encoder position
+  public Command elevatorDownCommand(double speed) {
+    return run(() -> {
+      elevatorLeftMotor.set(-speed);
+      elevatorRightMotor.set(-speed);
+    });
+  }
+
+  public Command stopAllCommand() {
+    return run(() -> {
+      elevatorLeftMotor.stopMotor();
+      elevatorRightMotor.stopMotor();
+    });
+  }
 
   @Override
   public void periodic() {
