@@ -12,11 +12,15 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.OperatorConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Limelight;
@@ -26,9 +30,12 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    private final SwerveRequest.FieldCentric driveFieldCentric = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    private final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
@@ -37,6 +44,13 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final Joystick buttonBoard = new Joystick(OperatorConstants.BUTTON_BOARD_PORT);
+    private final CommandJoystick commandButtonBoard = new CommandJoystick(1);
+
+    private final JoystickButton elevatorUp, elevatorDown, algaeUp, algeaDown,
+                                algeaCollect, algeaRelease, coralGrab, coralRelease, 
+                                stopAll;
+
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Limelight limelight;
@@ -50,6 +64,17 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
         limelight = new Limelight();
 
+        // buttons
+        elevatorUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);
+        elevatorDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);
+        algaeUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_2); 
+        algeaDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);
+        algeaCollect = new JoystickButton(buttonBoard, OperatorConstants.PORT_3); 
+        algeaRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_6);
+        coralGrab = new JoystickButton(buttonBoard, OperatorConstants.PORT_7); 
+        coralRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_9);
+        stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_10);
+
         configureBindings();
     }
 
@@ -59,7 +84,7 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                driveFieldCentric.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
@@ -70,10 +95,12 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
-        joystick.y().whileTrue(drivetrain.getInRange(drivetrain, 10.25, 0.25));// modify distance (2nd param)
-        joystick.x().whileTrue(drivetrain.findTarget(drivetrain, 0.25));// try negative number
+        joystick.y().whileTrue(drivetrain.getInRange(driveRobotCentric, 10.25, 0.25));// modify distance (2nd param)
+        joystick.x().whileTrue(drivetrain.findTarget(driveRobotCentric, 0.25));// try negative number
 
-        joystick.rightBumper().onTrue(drivetrain.stopSwerve(drivetrain));
+        // joystick.rightBumper().onTrue(drivetrain.stopSwerveUsingBrake(brake));
+        joystick.rightBumper().onTrue(drivetrain.stopSwerve(driveFieldCentric));
+
 
         joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
             forwardStraight.withVelocityX(0.5).withVelocityY(0))
