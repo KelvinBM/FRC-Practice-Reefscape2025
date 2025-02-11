@@ -151,6 +151,7 @@ public class Elevator extends SubsystemBase {
   //     elevatorMotor_Bottom.set(speed);
   // }
 
+  
   /***** COMMANDS *****/
   //implement encoder position
   public Command elevatorUpCommand(double speed) {

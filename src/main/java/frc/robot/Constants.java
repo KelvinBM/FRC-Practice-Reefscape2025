@@ -9,6 +9,7 @@ public final class Constants {
 
     public static final int ALGEA_ADJUSTER_MOTOR_ID = 0;
     public static final int ALGEA_COLLECTOR_MOTOR_ID = 0;
+    public static final int ALGEA_BEAM_BREAKER_PORT = 0;
 
 
     // driving adjust
