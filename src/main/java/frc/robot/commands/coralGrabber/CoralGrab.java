@@ -27,6 +27,6 @@ public class CoralGrab extends Command {
 
     @Override
     public boolean isFinished() {
-        return CoralGrabber.hasCoral();
+        return coralGrabber.hasCoral();
     }
 }

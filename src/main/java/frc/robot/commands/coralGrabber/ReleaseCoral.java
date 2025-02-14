@@ -24,7 +24,7 @@ public class ReleaseCoral extends Command {
 
     @Override
     public void execute() {
-        if(Timer.getFPGATimestamp() - timerStart <= 4)
+        if(Timer.getFPGATimestamp() - timerStart <= 3)
             coralGrabber.releaseCoral(speed);
         else
             finished = true;

@@ -39,9 +39,6 @@ public class CoralGrabber extends SubsystemBase {
 
   // other sensors
   private DigitalInput coralBeamBreaker = new DigitalInput(CoralGrabberConstants.BEAM_BREAKER_PORT);
-  private static DigitalInput coralLimitSwitch_Up = new DigitalInput(CoralGrabberConstants.LIMIT_SWITCH_UP_PORT);
-  private static DigitalInput coralLimitSwitch_Down = new DigitalInput(CoralGrabberConstants.LIMIT_SWITCH_DOWN_PORT);
-  private static DigitalInput hasCoralLimitSwitch = new DigitalInput(CoralGrabberConstants.LIMIT_SWITCH_CORAL_PORT);
 
   // private SparkClosedLoopController adjusterClosedLoopController = coralAdjustMotor.getClosedLoopController();
   private SparkClosedLoopController rightClosedLoopController = coralRightMotor.getClosedLoopController();
@@ -150,49 +147,9 @@ public class CoralGrabber extends SubsystemBase {
   }
 
   // sensor boolean methods
-  public static boolean getCoralLimitSwitch_Up() {
-    return !coralLimitSwitch_Up.get();
-  }
-
-  public static boolean getCoralLimitSwitch_Down() {
-    return !coralLimitSwitch_Down.get();
-  }
-
   public static boolean hasCoral() {
-    return !hasCoralLimitSwitch.get(); // might have to modify
+    return !coralBeamBreaker.get();
   }
-
-  // public void up(double speed) {
-  //   if (!coralLimitSwitch_Up.get())
-  //     coralAdjustMotor.set(speed);
-  //   else
-  //     coralAdjustMotor.stopMotor();
-  // }
-
-  // public void down(double speed) {
-  //   if (!coralLimitSwitch_Down.get())
-  //     coralAdjustMotor.set(speed);
-  //   else
-  //     coralAdjustMotor.stopMotor();
-  // }
-
-  // 90 degrees --> figure out
-  // public boolean upWithEncoder(double speed, double targetEncoderPosition) {
-  //   if (coralAdjustEncoder.getPosition() >= targetEncoderPosition)
-  //     return true;
-
-  //   coralAdjustMotor.set(speed);
-  //   return false;
-  // }
-
-  // remove targetEncoderPosition after figuring out the encoder value
-  // public boolean downWithEncoder(double speed, double targetEncoderPosition) {
-  //   if (coralAdjustEncoder.getPosition() < targetEncoderPosition)
-  //     return true;
-
-  //   coralAdjustMotor.set(-speed);
-  //   return false;
-  // }
 
   public void grabCoral(double speed) {
     if (!coralBeamBreaker.get())
@@ -221,29 +178,6 @@ public class CoralGrabber extends SubsystemBase {
     // coralAdjustMotor.stopMotor();
     coralRightMotor.stopMotor();
     coralLeftMotor.stopMotor();
-  }
-
-  /***** COMMANDS *****/
-  // implement limit switch
-  public Command grabCoralCommand(double speed) {
-    return run(() -> {
-      coralLeftMotor.set(speed);
-      coralRightMotor.set(speed);
-    });
-  }
-
-  public Command releaseCoralCommand(double speed) {
-    return run(() -> {
-      coralLeftMotor.set(-speed);
-      coralRightMotor.set(-speed);
-    });
-  }
-
-  public Command stopAllMotorsCommand() {
-    return run(() -> {
-      coralLeftMotor.stopMotor();
-      coralRightMotor.stopMotor();
-    });
   }
 
   @Override

@@ -4,12 +4,8 @@ package frc.robot;
 public final class Constants {
 
     public static double ClimberInitialSpeed = 0.4;
-    public static final int CLIMBER_ADJUSTER_MOTOR_ID = 20;
-    public static final int CLIMBER_ROPE_PULLER_ID = 0;
-
-    public static final int ALGEA_ADJUSTER_MOTOR_ID = 0;
-    public static final int ALGEA_COLLECTOR_MOTOR_ID = 0;
-    public static final int ALGEA_BEAM_BREAKER_PORT = 0;
+    public static final int CLIMBER_ADJUSTER_MOTOR_ID = 41;
+    public static final int CLIMBER_ROPE_PULLER_MOTOR_ID = 42;// winch
 
 
     // driving adjust
@@ -24,19 +20,30 @@ public final class Constants {
         public static final double kDesiredDistanceOffset_Inches = 20;
     }
 
+    public static final class AlgaeCollectorConstants {
+        public static final int ALGAE_ADJUSTER_MOTOR_ID = 51;
+        public static final int ALGAE_COLLECTOR_MOTOR_ID = 52;
+
+        public static final int ALGAE_COLLECTOR_LIMIT_SWITCH_PORT = 54;
+
+        public static final int ALGEA_BEAM_BREAKER_PORT = 0;
+    }
+
     public static final class CoralGrabberConstants {
         // public static final int CORAL_ADJUST_MOTOR_ID = 8;
-        public static final int CORAL_MOTOR_RIGHT_ID = 0;
-        public static final int CORAL_MOTOR_LEFT_ID = 0;
-        public static final int BEAM_BREAKER_PORT = 0;
-        public static final int LIMIT_SWITCH_UP_PORT = 0; // might not be needed
-        public static final int LIMIT_SWITCH_DOWN_PORT = 0; // might not be needed
-        public static final int LIMIT_SWITCH_CORAL_PORT = 0;
+        public static final int CORAL_MOTOR_RIGHT_ID = 21;
+        public static final int CORAL_MOTOR_LEFT_ID = 22;
+
+        public static final int BEAM_BREAKER_PORT = 23;
+
+        public static final int LIMIT_SWITCH_UP_PORT = 26; // might not be needed
+        public static final int LIMIT_SWITCH_DOWN_PORT = 24; // might not be needed
+        public static final int LIMIT_SWITCH_CORAL_PORT = 25;
     }
 
     public static final class ElevatorConstants {
-        public static final int ELEVATOR_TOP_MOTOR_ID = 0;
-        public static final int ELEVATOR_BOTTOM_MOTOR_ID = 0;
+        public static final int ELEVATOR_TOP_MOTOR_ID = 31;
+        public static final int ELEVATOR_BOTTOM_MOTOR_ID = 32;
     }
 
     public static final class OperatorConstants {

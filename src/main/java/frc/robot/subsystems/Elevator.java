@@ -45,6 +45,8 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     elevatorMotorConfigs();
     resetMotorsEncoderPosition();
+    rightMotorEncoder.setPosition(0);
+    leftMotorEncoder.setPosition(0);
   }
 
   public void elevatorMotorConfigs() {
@@ -57,14 +59,14 @@ public class Elevator extends SubsystemBase {
     rightClosedLoopController
       .setReference(30, ControlType.kCurrent);
 
-    elevatorRightConfig.inverted(false)// may have to change
+    elevatorRightConfig.inverted(true)// may have to change
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(35)
       .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .p(0.1)// right pid
       .d(0);
 
-    elevatorLeftConfig.inverted(true)// may have to change
+    elevatorLeftConfig.inverted(false)// may have to change
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(35)
       .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -139,18 +141,42 @@ public class Elevator extends SubsystemBase {
       stopAllMotors();
   }
 
-
   public void stopAllMotors() {
     elevatorRightMotor.stopMotor();
     elevatorLeftMotor.stopMotor();
   }
 
-  /* create methods for elevator */
-  // public void goToFirstLevel(double speed) {
-  //   if(bottomMotorEncoder.getPosition() < 10)
-  //     elevatorMotor_Bottom.set(speed);
-  // }
+  public void raiseToLevel1(double speed) {
+    if(leftMotorEncoder.getPosition() < 60) {
+      elevatorLeftMotor.set(speed);
+      elevatorRightMotor.set(speed);
+    } else
+      stopAllMotors();
+  }
 
+  public void raiseToLevel2(double speed) {
+    if(leftMotorEncoder.getPosition() < 90) {
+      elevatorLeftMotor.set(speed);
+      elevatorRightMotor.set(speed);
+    } else
+      stopAllMotors();
+  }
+
+  public void raiseToLevel3(double speed) {
+    if(leftMotorEncoder.getPosition() < 110) {
+      elevatorLeftMotor.set(speed);
+      elevatorRightMotor.set(speed);
+    } else
+      stopAllMotors();
+  }
+
+  public void lowerToStartPosition(double speed) {
+    if(leftMotorEncoder.getPosition() > 4) {
+      elevatorLeftMotor.set(speed);
+      elevatorRightMotor.set(speed);
+    } else
+      stopAllMotors();
+  }
   
   /***** COMMANDS *****/
   //implement encoder position
