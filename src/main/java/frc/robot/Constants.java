@@ -24,7 +24,7 @@ public final class Constants {
         public static final int ALGAE_ADJUSTER_MOTOR_ID = 51;
         public static final int ALGAE_COLLECTOR_MOTOR_ID = 52;
 
-        public static final int ALGAE_COLLECTOR_LIMIT_SWITCH_PORT = 54;
+        public static final int ALGAE_COLLECTOR_LIMIT_SWITCH_PORT = 1;
 
         public static final int ALGEA_BEAM_BREAKER_PORT = 0;
     }
@@ -35,10 +35,6 @@ public final class Constants {
         public static final int CORAL_MOTOR_LEFT_ID = 22;
 
         public static final int BEAM_BREAKER_PORT = 23;
-
-        public static final int LIMIT_SWITCH_UP_PORT = 26; // might not be needed
-        public static final int LIMIT_SWITCH_DOWN_PORT = 24; // might not be needed
-        public static final int LIMIT_SWITCH_CORAL_PORT = 25;
     }
 
     public static final class ElevatorConstants {
@@ -48,7 +44,7 @@ public final class Constants {
 
     public static final class OperatorConstants {
         // controllers
-        public static final int BUTTON_BOARD_PORT = 0;
+        public static final int BUTTON_BOARD_PORT = 4;
 
 
         // button board buttons

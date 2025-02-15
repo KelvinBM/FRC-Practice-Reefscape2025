@@ -22,8 +22,15 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
 
+  // encoder setpoint values for elevator
+  private final double kLevel1EncoderPosition = 100;
+  private final double kLevel2EncoderPosition = 210;
+  private final double kLevel3EncoderPosition = 295;// 295 - 300 // RIGHT_ENCODER
+  private final double kHumanStationEncoderPosition = 39;
+  private final double kStartingPosition = 5;// actually 0
+
   // PID constants
-  private final double kP = 0.1;
+  private final double kP = 0.001;
 
   // motors
   private SparkMax elevatorLeftMotor = new SparkMax(ElevatorConstants.ELEVATOR_TOP_MOTOR_ID, MotorType.kBrushless);
@@ -43,8 +50,10 @@ public class Elevator extends SubsystemBase {
 
   /** Creates a new Elevator. */
   public Elevator() {
-    elevatorMotorConfigs();
+    setToCoastMode();
+    // setToBrakeMode();
     resetMotorsEncoderPosition();
+    elevatorMotorConfigs();
     rightMotorEncoder.setPosition(0);
     leftMotorEncoder.setPosition(0);
   }
@@ -53,32 +62,21 @@ public class Elevator extends SubsystemBase {
     elevatorRightMotor.clearFaults();
     elevatorLeftMotor.clearFaults();
 
-    leftClosedLoopController
-      .setReference(30, ControlType.kCurrent);
-    
-    rightClosedLoopController
-      .setReference(30, ControlType.kCurrent);
-
-    elevatorRightConfig.inverted(true)// may have to change
-      .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(35)
-      .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.1)// right pid
+    elevatorRightConfig.closedLoop
+      .p(0.1)
       .d(0);
 
-    elevatorLeftConfig.inverted(false)// may have to change
-      .idleMode(IdleMode.kBrake)
-      .smartCurrentLimit(35)
-      .closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      .p(0.1)// left pid
+    elevatorLeftConfig.closedLoop
+      .p(0.1)
       .d(0);
 
-    elevatorRightMotor.configure(elevatorRightConfig,
-      ResetMode.kNoResetSafeParameters,
-      PersistMode.kPersistParameters);
-    elevatorLeftMotor.configure(elevatorLeftConfig,
-      ResetMode.kNoResetSafeParameters,
-      PersistMode.kPersistParameters);
+    elevatorRightConfig.inverted(false)
+      .follow(elevatorRightMotor);
+
+    elevatorLeftConfig.inverted(true);
+
+    elevatorRightMotor.configure(elevatorRightConfig, null, null);
+    elevatorLeftMotor.configure(elevatorLeftConfig, null, null);
   }
 
   public void setToBrakeMode() {
@@ -92,11 +90,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public double getRightEncoderPosition() {
-    return rightMotorEncoder.getPosition();
+    return Math.floor(rightMotorEncoder.getPosition());
   }
 
   public double getLeftEncoderPosition() {
-    return leftMotorEncoder.getPosition();
+    return Math.floor(leftMotorEncoder.getPosition());
   }
 
   public void putElevatorValuesInSmartDashboard() {
@@ -122,85 +120,77 @@ public class Elevator extends SubsystemBase {
   }
 
   //---------- ELEVATOR METHODS ----------//
-  public void goToFirstLevel_Pid(double setpoint) { // remove param 'setpoint' after figuring it out
-    if(leftMotorEncoder.getPosition() < setpoint) {
-      double speed = pidForElevator(leftMotorEncoder.getPosition(), setpoint);
-      elevatorRightMotor.set(speed);
-      elevatorLeftMotor.set(speed);
-    } else
-      stopAllMotors();
-  }
-
-  public void goToStartingPositioin() {
-    final double setpoint = 5;
-    if(getRightEncoderPosition() > setpoint) {
-      double speed = pidForElevator(leftMotorEncoder.getPosition(), setpoint);
-      elevatorLeftMotor.set(-speed);
-      elevatorRightMotor.set(-speed);
-    } else
-      stopAllMotors();
-  }
-
   public void stopAllMotors() {
     elevatorRightMotor.stopMotor();
     elevatorLeftMotor.stopMotor();
   }
 
-  public void raiseToLevel1(double speed) {
-    if(leftMotorEncoder.getPosition() < 60) {
-      elevatorLeftMotor.set(speed);
-      elevatorRightMotor.set(speed);
+  public void raiseElevator(double speed) {
+    elevatorLeftMotor.set(speed);
+    elevatorRightMotor.set(speed);
+  }
+
+  public void lowerElevator(double speed) {
+    elevatorLeftMotor.set(-speed);
+    elevatorRightMotor.set(-speed);
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  ///                                                                                           ///
+  /// BOOLEAN COMMANDS                                                                          ///
+  ///                                                                                           ///
+  ///////////////////////////////////////////////////////////////////////////////////////////////// 
+  public boolean hasReachedLevel1() {
+    return Math.floor(leftMotorEncoder.getPosition()) == kLevel1EncoderPosition;
+  }
+
+  public boolean hasReachedLevel2() {
+    return Math.floor(leftMotorEncoder.getPosition()) == kLevel2EncoderPosition;
+  }
+
+  public boolean hasReachedLevel3() {
+    return Math.floor(leftMotorEncoder.getPosition()) == kLevel3EncoderPosition;
+  }
+
+  public boolean hasReachedHumanStation() {
+    return Math.floor(leftMotorEncoder.getPosition()) == kHumanStationEncoderPosition;
+  }
+
+  public void goToLevel1() {
+    if(getRightEncoderPosition() < kLevel1EncoderPosition) {
+      rightClosedLoopController.setReference(kLevel1EncoderPosition, ControlType.kPosition);
     } else
       stopAllMotors();
   }
 
-  public void raiseToLevel2(double speed) {
-    if(leftMotorEncoder.getPosition() < 90) {
-      elevatorLeftMotor.set(speed);
-      elevatorRightMotor.set(speed);
+  public void goToLevel2() {
+    if(getRightEncoderPosition() < kLevel2EncoderPosition) {
+      rightClosedLoopController.setReference(kLevel2EncoderPosition, ControlType.kPosition);
     } else
       stopAllMotors();
   }
 
-  public void raiseToLevel3(double speed) {
-    if(leftMotorEncoder.getPosition() < 110) {
-      elevatorLeftMotor.set(speed);
-      elevatorRightMotor.set(speed);
+  public void goToLevel3() {
+    if(getRightEncoderPosition() < kLevel3EncoderPosition) {
+      rightClosedLoopController.setReference(kLevel3EncoderPosition, ControlType.kPosition);
     } else
       stopAllMotors();
   }
 
-  public void lowerToStartPosition(double speed) {
-    if(leftMotorEncoder.getPosition() > 4) {
-      elevatorLeftMotor.set(speed);
-      elevatorRightMotor.set(speed);
+  public void goToHumanStation() {
+    if(getRightEncoderPosition() > kHumanStationEncoderPosition) {
+      rightClosedLoopController.setReference(kHumanStationEncoderPosition, ControlType.kPosition);
+    } else
+      stopAllMotors();
+  }
+
+  public void lowerToStartPosition() {
+    if(getRightEncoderPosition() > kStartingPosition) {
+      rightClosedLoopController.setReference(kStartingPosition, ControlType.kPosition);
     } else
       stopAllMotors();
   }
   
-  /***** COMMANDS *****/
-  //implement encoder position
-  public Command elevatorUpCommand(double speed) {
-    return run(() -> {
-      elevatorLeftMotor.set(speed);
-      elevatorRightMotor.set(speed);
-    });
-  }
-
-  // implement encoder position
-  public Command elevatorDownCommand(double speed) {
-    return run(() -> {
-      elevatorLeftMotor.set(-speed);
-      elevatorRightMotor.set(-speed);
-    });
-  }
-
-  public Command stopAllCommand() {
-    return run(() -> {
-      elevatorLeftMotor.stopMotor();
-      elevatorRightMotor.stopMotor();
-    });
-  }
 
   @Override
   public void periodic() {

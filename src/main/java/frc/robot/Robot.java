@@ -35,6 +35,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     Limelight.putLimelightValuesInDashboard();
     SmartDashboard.putBoolean("Has Target", true);
+    SmartDashboard.updateValues();
 
     /*
      * This example of adding Limelight is very simple and may not be sufficient for on-field use.

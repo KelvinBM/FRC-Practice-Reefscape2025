@@ -12,7 +12,7 @@ public class StopAlgaeCollector extends Command {
     }
 
     @Override
-    public void execute() {
+    public void initialize() {
         algaeCollector.stopMotors();
     }
 
