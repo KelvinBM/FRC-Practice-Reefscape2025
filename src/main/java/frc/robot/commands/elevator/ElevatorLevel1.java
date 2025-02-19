@@ -5,11 +5,9 @@ import frc.robot.subsystems.Elevator;
 
 public class ElevatorLevel1 extends Command {
     private Elevator elevator;
-    private double speed;
 
-    public ElevatorLevel1(Elevator elevator, double speed) {
+    public ElevatorLevel1(Elevator elevator) {
         this.elevator = elevator;
-        this.speed = speed;
 
         addRequirements(elevator);
     }

@@ -15,6 +15,9 @@ public class LowerElevator extends Command {
     }
 
     @Override
+    public void initialize() {}
+
+    @Override
     public void execute() {
         elevator.lowerElevator(speed);
     }

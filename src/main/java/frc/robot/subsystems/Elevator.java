@@ -8,15 +8,12 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
@@ -24,8 +21,8 @@ public class Elevator extends SubsystemBase {
 
   // encoder setpoint values for elevator
   private final double kLevel1EncoderPosition = 100;
-  private final double kLevel2EncoderPosition = 210;
-  private final double kLevel3EncoderPosition = 295;// 295 - 300 // RIGHT_ENCODER
+  private final double kLevel2EncoderPosition = 210;// 210
+  private final double kLevel3EncoderPosition = 295;// 325 // RIGHT_ENCODER
   private final double kHumanStationEncoderPosition = 39;
   private final double kStartingPosition = 5;// actually 0
 
@@ -63,12 +60,10 @@ public class Elevator extends SubsystemBase {
     elevatorLeftMotor.clearFaults();
 
     elevatorRightConfig.closedLoop
-      .p(0.1)
-      .d(0);
+      .p(0.1);
 
     elevatorLeftConfig.closedLoop
-      .p(0.1)
-      .d(0);
+      .p(0.1);
 
     elevatorRightConfig.inverted(false)
       .follow(elevatorRightMotor);

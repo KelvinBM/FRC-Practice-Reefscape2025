@@ -23,6 +23,9 @@ import frc.robot.commands.StopAll;
 import frc.robot.commands.algaeCollector.AlgaeAdjustToStart;
 import frc.robot.commands.algaeCollector.AlgaeLowerAndCollect;
 import frc.robot.commands.algaeCollector.AlgaeLowerToCollect;
+import frc.robot.commands.elevator.ElevatorLevel1;
+import frc.robot.commands.elevator.ElevatorLevel2;
+import frc.robot.commands.elevator.ElevatorLevel3;
 import frc.robot.commands.elevator.LowerElevator;
 import frc.robot.commands.elevator.RaiseElevator;
 import frc.robot.generated.TunerConstants;
@@ -53,11 +56,12 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final Joystick buttonBoard = new Joystick(OperatorConstants.BUTTON_BOARD_PORT);
-
+    // private final CommandJoystick
     // private final JoystickButton elevatorLevel1, elevatorLevel2, elevatorLevel3, 
     //                             elevatorStartPosition, algaeLowerAndCollect, algaeStartPosition,
     //                             algeaAllInOne, algeaRelease, coralGrab, coralRelease, 
     //                             stopAll;
+    private final JoystickButton stopAll, raiseElevator, lowerElevator, elevatorL1, elevatorL2, elevatorL3;
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
@@ -74,15 +78,21 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
+
+        // button bindings
+        elevatorL1 = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);
+        elevatorL2 = new JoystickButton(buttonBoard, OperatorConstants.PORT_2);
+        elevatorL3 = new JoystickButton(buttonBoard, OperatorConstants.PORT_3);
+        raiseElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);
+        lowerElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);
+        stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_6);
+        
+
         configureBindings();
     }
 
     private void configureBindings() {
         // assign buttons their ports
-        final JoystickButton stopAll = new JoystickButton(buttonBoard, 6);
-        final JoystickButton up = new JoystickButton(buttonBoard, 4);
-        final JoystickButton down = new JoystickButton(buttonBoard, 5);
-
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -100,9 +110,13 @@ public class RobotContainer {
         joystick.x().onTrue(new AlgaeAdjustToStart(algaeCollector));
 
         stopAll.onTrue(new StopAll(algaeCollector, climber, coralGrabber, elevator));
-        up.whileTrue(new RaiseElevator(elevator, 0.2));
-        down.whileTrue(new LowerElevator(elevator, 0.2));
+        raiseElevator.whileTrue(new RaiseElevator(elevator, 0.2));
+        lowerElevator.whileTrue(new LowerElevator(elevator, 0.2));
         
+        elevatorL1.onTrue(new ElevatorLevel1(elevator));
+        elevatorL2.onTrue(new ElevatorLevel2(elevator));
+        elevatorL3.onTrue(new ElevatorLevel3(elevator));
+
         // l1.onTrue(new)
         // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         // joystick.b().whileTrue(drivetrain.applyRequest(() ->

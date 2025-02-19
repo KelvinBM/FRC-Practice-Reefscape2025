@@ -21,12 +21,13 @@ public class RaiseElevator extends Command {
     }
 
     @Override
+    public void end(boolean interrupted) {
+        elevator.stopAllMotors();
+    }
+    
+    @Override
     public boolean isFinished() {
         return false;
     }
 
-    @Override
-    public void end(boolean interrupted) {
-        elevator.stopAllMotors();
-    }
 }
