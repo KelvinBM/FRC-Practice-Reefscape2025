@@ -3,11 +3,11 @@ package frc.robot.commands.elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
-public class RaiseElevatorLevel1 extends Command {
+public class ElevatorLevel2 extends Command {
     private Elevator elevator;
     private double speed;
 
-    public RaiseElevatorLevel1(Elevator elevator, double speed) {
+    public ElevatorLevel2(Elevator elevator, double speed) {
         this.elevator = elevator;
         this.speed = speed;
 
@@ -16,12 +16,12 @@ public class RaiseElevatorLevel1 extends Command {
 
     @Override
     public void execute() {
-        elevator.goToLevel1();
+        elevator.goToLevel2();
     }
 
     @Override
     public boolean isFinished() {
-        return elevator.hasReachedLevel1();
+        return elevator.hasReachedLevel2();
     }
 
     @Override

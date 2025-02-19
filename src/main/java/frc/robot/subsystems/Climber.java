@@ -8,27 +8,16 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
+
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
-  private SparkMax climberAdjuster = new SparkMax(Constants.CLIMBER_ADJUSTER_MOTOR_ID, MotorType.kBrushless);
-  private SparkMax climberRopePuller = new SparkMax(Constants.CLIMBER_ROPE_PULLER_MOTOR_ID, MotorType.kBrushless);
-  private SparkMaxConfig climberConfig = new SparkMaxConfig();
-  private RelativeEncoder climberAdjusterEncoder = climberAdjuster.getEncoder();
 
-
-  private TalonFX climberAdjusterTalon = new TalonFX(Constants.CLIMBER_ADJUSTER_MOTOR_ID);
-  private TalonFX climberRopePullerTalon = new TalonFX(Constants.CLIMBER_ROPE_PULLER_MOTOR_ID);
+  private TalonFX climberAdjuster = new TalonFX(Constants.CLIMBER_ADJUSTER_MOTOR_ID);
+  private TalonFX climberRopePuller = new TalonFX(Constants.CLIMBER_ROPE_PULLER_MOTOR_ID);
 
   /** Creates a new Climber. */
   public Climber() {
@@ -38,11 +27,10 @@ public class Climber extends SubsystemBase {
     climberAdjusterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;// might need to invert
     climberRopePullerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;// might need to invert
 
+    climberAdjuster.getConfigurator().apply(climberAdjusterConfig);
+    climberRopePuller.getConfigurator().apply(climberAdjusterConfig);
 
-    climberAdjusterTalon.getConfigurator().apply(climberAdjusterConfig);
-    climberRopePullerTalon.getConfigurator().apply(climberAdjusterConfig);
-
-    climberAdjusterTalon.setPosition(0);
+    climberAdjuster.setPosition(0);
 
     // var slot0Configs = climberAdjusterConfig.Slot0;
     // slot0Configs.kS = 0.25; // Add 0.25 V output to overcome static friction
@@ -53,7 +41,7 @@ public class Climber extends SubsystemBase {
   }
 
   public void uploadAdjusterPosition() {
-    double position = climberAdjusterTalon.getPosition().getValueAsDouble();
+    double position = climberAdjuster.getPosition().getValueAsDouble();
     SmartDashboard.putNumber("Climber Adjuster Position", position);
   }
 

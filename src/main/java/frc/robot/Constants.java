@@ -44,7 +44,7 @@ public final class Constants {
 
     public static final class OperatorConstants {
         // controllers
-        public static final int BUTTON_BOARD_PORT = 4;
+        public static final int BUTTON_BOARD_PORT = 1;
 
 
         // button board buttons

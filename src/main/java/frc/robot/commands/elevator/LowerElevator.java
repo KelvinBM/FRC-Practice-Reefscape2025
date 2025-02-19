@@ -20,12 +20,12 @@ public class LowerElevator extends Command {
     }
 
     @Override
-    public boolean isFinished() {
-        return false;
+    public void end(boolean interrupted) {
+        elevator.stopAllMotors();
     }
 
     @Override
-    public void end(boolean interrupted) {
-        elevator.stopAllMotors();
+    public boolean isFinished() {
+        return false;
     }
 }

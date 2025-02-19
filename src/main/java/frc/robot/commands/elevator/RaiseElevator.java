@@ -29,5 +29,4 @@ public class RaiseElevator extends Command {
     public void end(boolean interrupted) {
         elevator.stopAllMotors();
     }
-
 }

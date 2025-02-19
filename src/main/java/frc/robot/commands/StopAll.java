@@ -31,6 +31,7 @@ public class StopAll extends Command {
     climber.stopAllMotors();
     coralGrabber.stopAllMotors();
     elevator.stopAllMotors();
+    System.out.println("STOPPED ALL");
   }
 
   @Override
