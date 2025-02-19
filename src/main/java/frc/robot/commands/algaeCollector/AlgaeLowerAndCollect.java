@@ -31,6 +31,6 @@ public class AlgaeLowerAndCollect extends Command {
 
   @Override
   public boolean isFinished() {
-    return algaeCollector.hasAlgae();
+    return algaeCollector.atStartPosition() && algaeCollector.hasAlgae();
   }
 }

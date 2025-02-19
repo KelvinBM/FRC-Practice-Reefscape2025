@@ -23,8 +23,8 @@ public class Climber extends SubsystemBase {
     TalonFXConfiguration climberAdjusterConfig = new TalonFXConfiguration();
     TalonFXConfiguration climberRopePullerConfig = new TalonFXConfiguration();
 
-    climberAdjusterConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;// might need to invert
-    climberRopePullerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;// might need to invert
+    // climberAdjusterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;// might need to invert
+    // climberRopePullerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;// might need to invert
 
     climberAdjuster.getConfigurator().apply(climberAdjusterConfig);
     climberRopePuller.getConfigurator().apply(climberAdjusterConfig);
@@ -58,6 +58,16 @@ public class Climber extends SubsystemBase {
 
   public void releaseRope(double speed) {
     climberRopePuller.set(-speed);
+  }
+
+  public void climb() {
+    climberAdjuster.set(0.1);
+    climberRopePuller.set(0.15);
+  }
+
+  public void lowerRobot() {
+    climberAdjuster.set(-0.1);
+    climberRopePuller.set(-0.15);
   }
 
   public void stopAllMotors() {

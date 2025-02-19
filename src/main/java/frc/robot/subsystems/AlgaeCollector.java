@@ -17,8 +17,8 @@ import frc.robot.Constants.AlgaeCollectorConstants;
 
 public class AlgaeCollector extends SubsystemBase {
     // algae position constants
-    private final double kLowerPosition = 16.5;// 16.5
-    private final double kStartPosition = 2; // offset start
+    private final double kLowerPosition = 13.5;// 16.5
+    private final double kStartPosition = 1; // offset start
     private final double kHumanStationPosition = 0;
 
     
@@ -40,6 +40,7 @@ public class AlgaeCollector extends SubsystemBase {
         adjusterConfig.idleMode(IdleMode.kBrake);
         collectorConfig.inverted(true)
             .idleMode(IdleMode.kBrake);
+        adjusterConfig.closedLoop.p(0.2);
 
         algaeAdjusterMotor.configure(adjusterConfig, null, null);
         algaeCollectorMotor.configure(collectorConfig, null, null);
@@ -102,14 +103,14 @@ public class AlgaeCollector extends SubsystemBase {
     }
 
     public void lowerAlgaeAndCollect(double collectorSpeed) {
-        if(!hasAlgae())
+        if(!hasAlgae()) {
             algaeCollectorMotor.set(collectorSpeed);
-        if(hasAlgae())
-            algaeCollectorMotor.stopMotor();
-        if(getAdjusterPosition() != kLowerPosition)
             adjusterClosedLoopController.setReference(kLowerPosition, ControlType.kPosition);
-        else if(getAdjusterPosition() == kLowerPosition)
-            algaeAdjusterMotor.stopMotor();
+        }
+        else if(hasAlgae()){
+            adjusterClosedLoopController.setReference(kStartPosition, ControlType.kPosition);
+            algaeCollectorMotor.stopMotor();
+        }
     }
 
     public void lowerToCollect() {

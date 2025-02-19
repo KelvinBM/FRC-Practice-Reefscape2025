@@ -22,7 +22,7 @@ public class Elevator extends SubsystemBase {
   // encoder setpoint values for elevator
   private final double kLevel1EncoderPosition = 100;
   private final double kLevel2EncoderPosition = 210;// 210
-  private final double kLevel3EncoderPosition = 295;// 325 // RIGHT_ENCODER
+  private final double kLevel3EncoderPosition = 300;// 325 // RIGHT_ENCODER
   private final double kHumanStationEncoderPosition = 39;
   private final double kStartingPosition = 5;// actually 0
 
