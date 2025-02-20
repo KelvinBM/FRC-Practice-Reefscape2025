@@ -21,14 +21,15 @@ public class ReleaseAlgae extends Command {
         algaeCollector.releaseAlgae(speed);
     }
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
-
+    
     @Override
     public void end(boolean interrupted) {
         algaeCollector.stopAlgaeCollector();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
     }
 
 }
