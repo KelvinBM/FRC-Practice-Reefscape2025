@@ -91,6 +91,7 @@ public class RobotContainer {
         elevatorL1 = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);// 1
         elevatorL2 = new JoystickButton(buttonBoard, OperatorConstants.PORT_2);// 2
         elevatorL3 = new JoystickButton(buttonBoard, OperatorConstants.PORT_3);// 3
+
         raiseElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);// 4
         lowerElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);// 5
 
@@ -104,8 +105,8 @@ public class RobotContainer {
         algaeLower = new JoystickButton(buttonBoard, 21);// 9
         algaeRaise = new JoystickButton(buttonBoard, 20);// 10
 
-        coralGrab = new JoystickButton(buttonBoard, 50);// 4
-        coralRelease = new JoystickButton(buttonBoard, 51);// 5
+        coralGrab = new JoystickButton(buttonBoard, 51);// 4
+        coralRelease = new JoystickButton(buttonBoard, 52);// 5
 
         // STOP ALL //        
         stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_10);
@@ -143,8 +144,11 @@ public class RobotContainer {
 
 
         // CORAL
-        coralGrab.onTrue(new CoralGrab(coralGrabber, 0.1));
-        coralRelease.onTrue(new CoralRelease(coralGrabber, 0.1));
+        // coralGrab.onTrue(new CoralGrab(coralGrabber, 0.1));
+        // coralRelease.onTrue(new CoralRelease(coralGrabber, 0.1));
+        joystick.rightBumper().whileTrue(new CoralGrab(coralGrabber, 0.15));
+        joystick.leftBumper().whileTrue(new CoralRelease(coralGrabber, 0.15));
+
 
         // CLIMBER
         climb.whileTrue(new Climb(climber));
