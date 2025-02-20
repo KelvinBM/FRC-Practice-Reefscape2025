@@ -10,10 +10,13 @@ import frc.robot.subsystems.Climber;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class LowerRobot extends Command {
   private Climber climber;
+  private double adjusterSpeed, ropePullerSpeed;
 
   /** Creates a new Lower. */
-  public LowerRobot(Climber climber) {
+  public LowerRobot(Climber climber, double adjusterSpeed, double ropePullerSpeed) {
     this.climber = climber;
+    this.adjusterSpeed = adjusterSpeed;
+    this.ropePullerSpeed = ropePullerSpeed;
 
     addRequirements(climber);
   }
@@ -25,7 +28,7 @@ public class LowerRobot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.lowerRobot();
+    climber.lowerRobot(adjusterSpeed, ropePullerSpeed);
   }
 
   // Called once the command ends or is interrupted.

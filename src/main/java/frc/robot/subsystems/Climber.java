@@ -60,14 +60,14 @@ public class Climber extends SubsystemBase {
     climberRopePuller.set(-speed);
   }
 
-  public void climb() {
-    climberAdjuster.set(0.1);
-    climberRopePuller.set(0.15);
+  public void climb(double adjusterSpeed, double ropePullerSpeed) {
+    climberAdjuster.set(adjusterSpeed);// 0.15
+    climberRopePuller.set(ropePullerSpeed);// 0.25
   }
 
-  public void lowerRobot() {
-    climberAdjuster.set(-0.1);
-    climberRopePuller.set(-0.15);
+  public void lowerRobot(double adjusterSpeed, double ropePullerSpeed) {
+    climberAdjuster.set(adjusterSpeed);// -0.15
+    climberRopePuller.set(ropePullerSpeed);// -0.25
   }
 
   public void stopAllMotors() {
