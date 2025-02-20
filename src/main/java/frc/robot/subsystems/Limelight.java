@@ -21,10 +21,12 @@ public class Limelight extends SubsystemBase {
   static NetworkTableEntry tv = table.getEntry("tv");
 
   /** Creates a new Limelight. */
-  public Limelight() {}
+  public Limelight() {
+    setLimelightPipeline(1);
+  }
 
   public void setLimelightPipeline(double pipelineNumber) {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setDouble(1);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setDouble(pipelineNumber);
   }
 
   public static double getTableValue(String tablentry) {
@@ -38,7 +40,7 @@ public class Limelight extends SubsystemBase {
       case "tv":
         return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0.0);
       case "pipeline":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getDouble(0.0);
+        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getDouble(1);
       default:
         return 0;
     }
@@ -84,6 +86,6 @@ public class Limelight extends SubsystemBase {
   
   @Override
   public void periodic() {
-    // putLimelightValuesInDashboard(); // doesn't put values in smartdashboard -> periodic works for methods relating directly to subsystem
+    putLimelightValuesInDashboard(); // doesn't put values in smartdashboard -> periodic works for methods relating directly to subsystem
   }
 }

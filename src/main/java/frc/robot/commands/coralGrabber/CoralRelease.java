@@ -4,12 +4,12 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralGrabber;
 
-public class ReleaseCoral extends Command {
+public class CoralRelease extends Command {
     private CoralGrabber coralGrabber;
     private double speed, timerStart;
     private boolean finished;
 
-    public ReleaseCoral(CoralGrabber coralGrabber, double speed) {
+    public CoralRelease(CoralGrabber coralGrabber, double speed) {
         this.coralGrabber = coralGrabber;
         this.speed = speed;
 
@@ -24,7 +24,7 @@ public class ReleaseCoral extends Command {
 
     @Override
     public void execute() {
-        if(Timer.getFPGATimestamp() - timerStart <= 4)
+        if(Timer.getFPGATimestamp() - timerStart <= 2)
             coralGrabber.releaseCoral(speed);
         else
             finished = true;

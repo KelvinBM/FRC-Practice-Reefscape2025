@@ -5,49 +5,43 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.AlgaeCollector;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CoralGrabber;
 import frc.robot.subsystems.Elevator;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class StopAll extends Command {
-  private Elevator elevator;
-  private CoralGrabber coralGrabber;
+  private AlgaeCollector algaeCollector;
   private Climber climber;
+  private CoralGrabber coralGrabber;
+  private Elevator elevator;
 
-  /** Creates a new StopAll. */
-  public StopAll(
-    Elevator elevator, 
-    CoralGrabber coralGrabber, 
-    Climber climber) {
+  public StopAll(AlgaeCollector algaeCollector, Climber climber, CoralGrabber coralGrabber, Elevator elevator) {
+    this.algaeCollector = algaeCollector;
+    this.climber = climber;
+    this.coralGrabber = coralGrabber;
+    this.elevator = elevator;
 
-      this.elevator = elevator;
-      this.coralGrabber = coralGrabber;
-      this.climber = climber;
-
-      addRequirements(elevator, coralGrabber, climber);
-    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(algaeCollector, climber, coralGrabber, elevator);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator. stopAllMotors();
-    coralGrabber.stopAllMotors();
+    algaeCollector.stopMotors();
     climber.stopAllMotors();
+    coralGrabber.stopAllMotors();
+    elevator.stopAllMotors();
+    System.out.println("STOPPED ALL");
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {}
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

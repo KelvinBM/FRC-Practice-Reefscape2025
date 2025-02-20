@@ -1,8 +1,11 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -10,65 +13,127 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.AlgaeCollectorConstants;
 
 public class AlgaeCollector extends SubsystemBase {
+    // algae position constants
+    private final double kLowerPosition = 13.5;// 16.5
+    private final double kStartPosition = 1; // offset start
+    private final double kHumanStationPosition = 0;
+
     
-    private SparkMax algaeAdjusterMotor = new SparkMax(Constants.ALGEA_ADJUSTER_MOTOR_ID, MotorType.kBrushless);
-    private SparkMax algaeCollectorMotor = new SparkMax(Constants.ALGEA_COLLECTOR_MOTOR_ID, MotorType.kBrushless);
+    private SparkMax algaeAdjusterMotor = new SparkMax(AlgaeCollectorConstants.ALGAE_ADJUSTER_MOTOR_ID, MotorType.kBrushless);
+    private SparkMax algaeCollectorMotor = new SparkMax(AlgaeCollectorConstants.ALGAE_COLLECTOR_MOTOR_ID, MotorType.kBrushless);
+
+    private RelativeEncoder adjusterEncoder = algaeAdjusterMotor.getEncoder();
 
     private SparkMaxConfig adjusterConfig = new SparkMaxConfig();
     private SparkMaxConfig collectorConfig = new SparkMaxConfig();
 
-    private DigitalInput beamBreaker = new DigitalInput(Constants.ALGEA_BEAM_BREAKER_PORT);
+    // closedloop for controlling motor
+    private SparkClosedLoopController adjusterClosedLoopController = algaeAdjusterMotor.getClosedLoopController();
+
+    private DigitalInput beamBreaker = new DigitalInput(AlgaeCollectorConstants.ALGEA_BEAM_BREAKER_PORT);
+    private DigitalInput algaeCollectorLimitSwitch = new DigitalInput(AlgaeCollectorConstants.ALGAE_COLLECTOR_LIMIT_SWITCH_PORT);
 
     public AlgaeCollector() {
-        adjusterConfig.inverted(true)
+        adjusterConfig.idleMode(IdleMode.kBrake);
+        collectorConfig.inverted(true)
             .idleMode(IdleMode.kBrake);
-        collectorConfig.inverted(false)
-            .idleMode(IdleMode.kBrake);
+        adjusterConfig.closedLoop.p(0.2);
 
-        algaeAdjusterMotor.configure(adjusterConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        algaeCollectorMotor.configure(collectorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        algaeAdjusterMotor.configure(adjusterConfig, null, null);
+        algaeCollectorMotor.configure(collectorConfig, null, null);
+
+        algaeAdjusterResetEncoderPos();
     }
 
-
-
-    /***** COMMANDS *****/
-    public Command collectorUpwardCommand(double speed) {
-        return run(() -> algaeAdjusterMotor.set(speed));
+    public void algaeAdjusterResetEncoderPos() {
+        adjusterEncoder.setPosition(0);
     }
 
-    public Command collectorDownwardCommand(double speed) {
-        return run(() -> algaeAdjusterMotor.set(-speed));
+    public boolean hasAlgae() {
+        return !algaeCollectorLimitSwitch.get();// returns opposite, !limitSwitch.get() ==> false
     }
 
-    public Command grabAlgaeCommand(double speed) {
-        return run(() -> algaeCollectorMotor.set(speed));
-    }
-
-    public Command grabAlgaeWithBeamBreakerCommand(double speed) {
-        return run(() -> {
-            while(!beamBreaker.get()) // might change to 'if'
-                algaeCollectorMotor.set(speed);
+    public void collectAlgae(double speed) {
+        if(!hasAlgae())
+            algaeCollectorMotor.set(speed);
+        if(hasAlgae())
             algaeCollectorMotor.stopMotor();
-        });
     }
 
-    public Command releaseAlgaeCommand(double speed) {
-        return run(() -> {
-            while(!beamBreaker.get())
-                algaeCollectorMotor.set(-speed);
+    public void releaseAlgae(double speed) {
+        algaeCollectorMotor.set(-speed);
+    }
+
+    public void algaeCollectorUp(double speed) {
+        algaeAdjusterMotor.set(speed);
+    }
+
+    public void algaeCollectorDown(double speed) {
+        algaeAdjusterMotor.set(-speed);
+    }
+
+    public void stopAlgaeCollector() {
+        algaeCollectorMotor.stopMotor();
+    }
+
+    public void stopAlgeaAdjuster() {
+        algaeAdjusterMotor.stopMotor();
+    }
+
+    public void stopMotors() {
+        stopAlgaeCollector();
+        stopAlgeaAdjuster();
+    }
+
+
+    /////////////////////////////// BOOLEAN ///////////////////////////////
+    public boolean atStartPosition() {
+        return getAdjusterPosition() == kStartPosition;
+    }
+
+    public boolean atPickUpPosition() {
+        return getAdjusterPosition() == kLowerPosition;
+    }
+
+    public double getAdjusterPosition() {
+        return Math.floor(adjusterEncoder.getPosition());
+    }
+
+    public void lowerAlgaeAndCollect(double collectorSpeed) {
+        if(!hasAlgae()) {
+            algaeCollectorMotor.set(collectorSpeed);
+            adjusterClosedLoopController.setReference(kLowerPosition, ControlType.kPosition);
+        }
+        else if(hasAlgae()){
+            adjusterClosedLoopController.setReference(kStartPosition, ControlType.kPosition);
             algaeCollectorMotor.stopMotor();
-        });
-
+        }
     }
 
-    public Command stopAllCommand() {
-        return run(() -> {
+    public void lowerToCollect() {
+        if(getAdjusterPosition() != kLowerPosition) {
+            adjusterClosedLoopController.setReference(kLowerPosition, ControlType.kPosition);
+        }
+        if(getAdjusterPosition() == kLowerPosition) {
             algaeAdjusterMotor.stopMotor();
-            algaeCollectorMotor.stopMotor();
-        });
+        }
+    }
+
+    public void adjustAlgaeToStart() {
+        if(getAdjusterPosition() != kStartPosition)
+            adjusterClosedLoopController.setReference(kStartPosition, ControlType.kPosition);
+        else if(getAdjusterPosition() == kStartPosition)
+            algaeAdjusterMotor.stopMotor();
+    }
+
+    public void adjustAlgaeToHuman() {
+        if(getAdjusterPosition() != kHumanStationPosition) {
+            adjusterClosedLoopController.setReference(kHumanStationPosition, ControlType.kPosition);
+        } else if(getAdjusterPosition() == kHumanStationPosition)
+            algaeAdjusterMotor.stopMotor();
     }
 
     @Override

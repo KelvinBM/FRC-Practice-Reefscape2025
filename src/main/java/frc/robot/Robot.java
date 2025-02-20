@@ -8,6 +8,7 @@ import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +36,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     Limelight.putLimelightValuesInDashboard();
     SmartDashboard.putBoolean("Has Target", true);
+    SmartDashboard.updateValues();
 
     /*
      * This example of adding Limelight is very simple and may not be sufficient for on-field use.

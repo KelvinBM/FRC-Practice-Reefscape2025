@@ -11,7 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,10 +18,28 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.StopAll;
+import frc.robot.commands.algaeCollector.AlgaeAdjustToStart;
+import frc.robot.commands.algaeCollector.AlgaeLowerAndCollect;
+import frc.robot.commands.algaeCollector.AlgaeLowerToCollect;
+import frc.robot.commands.algaeCollector.CollectAlgae;
+import frc.robot.commands.algaeCollector.ReleaseAlgae;
+import frc.robot.commands.climber.Climb;
+import frc.robot.commands.climber.LowerRobot;
+import frc.robot.commands.coralGrabber.CoralGrab;
+import frc.robot.commands.coralGrabber.CoralRelease;
+import frc.robot.commands.elevator.ElevatorLevel1;
+import frc.robot.commands.elevator.ElevatorLevel2;
+import frc.robot.commands.elevator.ElevatorLevel3;
+import frc.robot.commands.elevator.LowerElevator;
+import frc.robot.commands.elevator.RaiseElevator;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.AlgaeCollector;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralGrabber;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Limelight;
 
 public class RobotContainer {
@@ -45,15 +62,21 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final Joystick buttonBoard = new Joystick(OperatorConstants.BUTTON_BOARD_PORT);
-    private final CommandJoystick commandButtonBoard = new CommandJoystick(1);
-
-    private final JoystickButton elevatorUp, elevatorDown, algaeUp, algeaDown,
-                                algeaCollect, algeaRelease, coralGrab, coralRelease, 
-                                stopAll;
-
+    // private final CommandJoystick
+    // private final JoystickButton elevatorLevel1, elevatorLevel2, elevatorLevel3, 
+    //                             elevatorStartPosition, algaeLowerAndCollect, algaeStartPosition,
+    //                             algeaAllInOne, algeaRelease, coralGrab, coralRelease, 
+    //                             stopAll;
+    private final JoystickButton stopAll, raiseElevator, lowerElevator, elevatorL1, elevatorL2, elevatorL3,
+                                 climb, lowerRobot, algaePickup, algaeRelease, algaeLower, algaeRaise, 
+                                 coralGrab, coralRelease;
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Limelight limelight;
+    public final Elevator elevator = new Elevator();
+    public final Climber climber = new Climber();
+    public final AlgaeCollector algaeCollector = new AlgaeCollector();
+    public final CoralGrabber coralGrabber = new CoralGrabber();
+    public final Limelight limelight = new Limelight();
 
 
     /* Path follower */
@@ -62,23 +85,36 @@ public class RobotContainer {
     public RobotContainer() {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
-        limelight = new Limelight();
 
-        // buttons
-        elevatorUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);
-        elevatorDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);
-        algaeUp = new JoystickButton(buttonBoard, OperatorConstants.PORT_2); 
-        algeaDown = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);
-        algeaCollect = new JoystickButton(buttonBoard, OperatorConstants.PORT_3); 
-        algeaRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_6);
-        coralGrab = new JoystickButton(buttonBoard, OperatorConstants.PORT_7); 
-        coralRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_9);
+
+        // button bindings
+        elevatorL1 = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);// 1
+        elevatorL2 = new JoystickButton(buttonBoard, OperatorConstants.PORT_2);// 2
+        elevatorL3 = new JoystickButton(buttonBoard, OperatorConstants.PORT_3);// 3
+        raiseElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);// 4
+        lowerElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);// 5
+
+
+        climb = new JoystickButton(buttonBoard, OperatorConstants.PORT_7); 
+        lowerRobot = new JoystickButton(buttonBoard, OperatorConstants.PORT_8);// 9 
+
+        algaePickup = new JoystickButton(buttonBoard, 14);// 8
+        algaeRelease = new JoystickButton(buttonBoard, 15);// 10
+
+        algaeLower = new JoystickButton(buttonBoard, 21);// 9
+        algaeRaise = new JoystickButton(buttonBoard, 20);// 10
+
+        coralGrab = new JoystickButton(buttonBoard, 50);// 4
+        coralRelease = new JoystickButton(buttonBoard, 51);// 5
+
+        // STOP ALL //        
         stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_10);
 
         configureBindings();
     }
 
     private void configureBindings() {
+        // assign buttons their ports
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -90,31 +126,42 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        // joystick.a().onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.3).andThen(new AlgaeAdjustToStart(algaeCollector)));
+        // joystick.b().onTrue(new StopAll(algaeCollector, climber, coralGrabber, elevator));
+        // joystick.y().onTrue(new AlgaeLowerToCollect(algaeCollector));
+        // joystick.x().onTrue(new AlgaeAdjustToStart(algaeCollector));
 
-        joystick.y().whileTrue(drivetrain.getInRange(driveRobotCentric, 10.25, 0.25));// modify distance (2nd param)
-        joystick.x().whileTrue(drivetrain.findTarget(driveRobotCentric, 0.25));// try negative number
+        // BUTTON BOARD //
+        stopAll.onTrue(new StopAll(algaeCollector, climber, coralGrabber, elevator));
 
-        // joystick.rightBumper().onTrue(drivetrain.stopSwerveUsingBrake(brake));
-        joystick.rightBumper().onTrue(drivetrain.stopSwerve(driveFieldCentric));
+        raiseElevator.whileTrue(new RaiseElevator(elevator, 0.2));
+        lowerElevator.whileTrue(new LowerElevator(elevator, 0.2));
+        
+        elevatorL1.onTrue(new ElevatorLevel1(elevator));
+        elevatorL2.onTrue(new ElevatorLevel2(elevator));
+        elevatorL3.onTrue(new ElevatorLevel3(elevator));
 
 
-        joystick.pov(0).whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(0.5).withVelocityY(0))
-        );
-        joystick.pov(180).whileTrue(drivetrain.applyRequest(() ->
-            forwardStraight.withVelocityX(-0.5).withVelocityY(0))
-        );
+        // CORAL
+        coralGrab.onTrue(new CoralGrab(coralGrabber, 0.1));
+        coralRelease.onTrue(new CoralRelease(coralGrabber, 0.1));
 
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // CLIMBER
+        climb.whileTrue(new Climb(climber));
+        lowerElevator.whileTrue(new LowerRobot(climber));
+
+        // ALGAE
+        joystick.x().whileTrue(new CollectAlgae(algaeCollector, 0.15));
+        joystick.a().onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.20));
+        joystick.b().onTrue(new ReleaseAlgae(algaeCollector, 0.20));
+
+
+        // l1.onTrue(new)
+        // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+        //     point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
+        // ));
+
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
