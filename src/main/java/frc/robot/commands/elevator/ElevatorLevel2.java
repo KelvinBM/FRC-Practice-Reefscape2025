@@ -17,14 +17,14 @@ public class ElevatorLevel2 extends Command {
         elevator.goToLevel2();
     }
 
-    @Override
-    public boolean isFinished() {
-        return elevator.hasReachedLevel2();
-    }
 
     @Override
     public void end(boolean interrupted) {
         elevator.stopAllMotors();
     }
 
+    @Override
+    public boolean isFinished() {
+        return elevator.hasReachedLevel2();
+    }
 }

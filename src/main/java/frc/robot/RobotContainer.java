@@ -22,8 +22,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.StopAll;
 import frc.robot.commands.algaeCollector.AlgaeAdjustToStart;
 import frc.robot.commands.algaeCollector.AlgaeLowerAndCollect;
-import frc.robot.commands.algaeCollector.AlgaeLowerToCollect;
-import frc.robot.commands.algaeCollector.CollectAlgae;
 import frc.robot.commands.algaeCollector.ReleaseAlgae;
 import frc.robot.commands.climber.Climb;
 import frc.robot.commands.climber.LowerRobot;
@@ -152,15 +150,13 @@ public class RobotContainer {
 
         // CLIMBER
         climb.whileTrue(new Climb(climber, 0.15, -0.25));
-        lowerElevator.whileTrue(new LowerRobot(climber, -0.15, 0.25));
+        lowerElevator.whileTrue(new LowerRobot(climber, 0.30, .30));
 
         // ALGAE
         algaeLowerAndCollect.onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.1));
         algaeRelease.onTrue(new ReleaseAlgae(algaeCollector, 0.2).withTimeout(0.25));
         // joystick.x().whileTrue(new CollectAlgae(algaeCollector, 0.15));
         // joystick.a().onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.20));
-        // joystick.b().onTrue(new ReleaseAlgae(algaeCollector, 0.20));
-
 
         // l1.onTrue(new)
         // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));

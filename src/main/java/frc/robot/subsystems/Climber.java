@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -16,18 +17,31 @@ import frc.robot.Constants;
 public class Climber extends SubsystemBase {
 
   private TalonFX climberAdjuster = new TalonFX(Constants.CLIMBER_ADJUSTER_MOTOR_ID);
-  private TalonFX climberRopePuller = new TalonFX(Constants.CLIMBER_ROPE_PULLER_MOTOR_ID);
+  private TalonFX climberWinch = new TalonFX(Constants.CLIMBER_ROPE_PULLER_MOTOR_ID);
 
   /** Creates a new Climber. */
   public Climber() {
-    TalonFXConfiguration climberAdjusterConfig = new TalonFXConfiguration();
-    TalonFXConfiguration climberRopePullerConfig = new TalonFXConfiguration();
+    TalonFXConfiguration adjusterConfig = new TalonFXConfiguration();
+    TalonFXConfiguration winchConfig = new TalonFXConfiguration();
 
     // climberAdjusterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;// might need to invert
     // climberRopePullerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;// might need to invert
+    winchConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    adjusterConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    climberAdjuster.getConfigurator().apply(climberAdjusterConfig);
-    climberRopePuller.getConfigurator().apply(climberAdjusterConfig);
+    // current limits
+    CurrentLimitsConfigs currentConfigs = new CurrentLimitsConfigs();
+    currentConfigs.SupplyCurrentLimitEnable  = true;
+    currentConfigs.StatorCurrentLimit = 30;
+    currentConfigs.SupplyCurrentLimit = 30;
+
+    adjusterConfig.withCurrentLimits(currentConfigs);
+    winchConfig.withCurrentLimits(currentConfigs);
+
+    winchConfig.CurrentLimits.StatorCurrentLimit = 30;
+
+    climberAdjuster.getConfigurator().apply(adjusterConfig);
+    climberWinch.getConfigurator().apply(winchConfig);
 
     climberAdjuster.setPosition(0);
 
@@ -48,31 +62,37 @@ public class Climber extends SubsystemBase {
     climberAdjuster.set(speed);
   }
 
-  public void climberHookDown(double speed) {
-    climberAdjuster.set(-speed);
+  public void climberHookDown( double adjusterSpeed, double winchSpeed) {
+    climberAdjuster.set(-adjusterSpeed);
+    climberWinch.set(winchSpeed);
   }
 
   public void pullRope(double speed) {
-    climberRopePuller.set(speed);
+    climberWinch.set(speed);
   }
 
   public void releaseRope(double speed) {
-    climberRopePuller.set(-speed);
+    climberWinch.set(-speed);
   }
 
   public void climb(double adjusterSpeed, double ropePullerSpeed) {
     climberAdjuster.set(adjusterSpeed);// 0.15
-    climberRopePuller.set(ropePullerSpeed);// 0.25
+    climberWinch.set(ropePullerSpeed);// 0.25
   }
 
-  public void lowerRobot(double adjusterSpeed, double ropePullerSpeed) {
-    climberAdjuster.set(adjusterSpeed);// -0.15
-    climberRopePuller.set(ropePullerSpeed);// -0.25
-  }
-
+  /***
+   * Stops all of the motors
+   */
   public void stopAllMotors() {
     climberAdjuster.stopMotor();
-    climberRopePuller.stopMotor();
+    climberWinch.stopMotor();
+  }
+
+  /***
+   * Stops the rope adjuster motor
+   */
+  public void stopWinch() {
+    climberAdjuster.stopMotor();
   }
 
   @Override

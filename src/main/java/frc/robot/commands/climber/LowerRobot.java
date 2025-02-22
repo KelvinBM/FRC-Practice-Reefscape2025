@@ -15,8 +15,8 @@ public class LowerRobot extends Command {
   /** Creates a new Lower. */
   public LowerRobot(Climber climber, double adjusterSpeed, double ropePullerSpeed) {
     this.climber = climber;
-    this.adjusterSpeed = adjusterSpeed;
     this.ropePullerSpeed = ropePullerSpeed;
+    this.adjusterSpeed = adjusterSpeed;
 
     addRequirements(climber);
   }
@@ -28,13 +28,13 @@ public class LowerRobot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.lowerRobot(adjusterSpeed, ropePullerSpeed);
+    climber.releaseRope(ropePullerSpeed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    climber.stopAllMotors();
+    climber.stopWinch();
   }
 
   // Returns true when the command should end.

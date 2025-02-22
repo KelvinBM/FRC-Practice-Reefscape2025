@@ -13,6 +13,7 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -45,11 +46,15 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController rightClosedLoopController =  elevatorRightMotor.getClosedLoopController();
   private SparkClosedLoopController leftClosedLoopController =  elevatorLeftMotor.getClosedLoopController();
 
+
+  // limit switch
+  private DigitalInput elevatorLimitSwitch = new DigitalInput(ElevatorConstants.ELEVATOR_LIMIT_SWITCH_PORT);
+
   /** Creates a new Elevator. */
   public Elevator() {
     setToCoastMode();
     // setToBrakeMode();
-    resetMotorsEncoderPosition();
+    resetMotorsEncoderPositions();
     elevatorMotorConfigs();
     rightMotorEncoder.setPosition(0);
     leftMotorEncoder.setPosition(0);
@@ -66,9 +71,11 @@ public class Elevator extends SubsystemBase {
       .p(0.1);
 
     elevatorRightConfig.inverted(false)
+      .smartCurrentLimit(40)
       .follow(elevatorRightMotor);
 
-    elevatorLeftConfig.inverted(true);
+    elevatorLeftConfig.inverted(true)
+      .smartCurrentLimit(40);
 
     elevatorRightMotor.configure(elevatorRightConfig, null, null);
     elevatorLeftMotor.configure(elevatorLeftConfig, null, null);
@@ -93,11 +100,16 @@ public class Elevator extends SubsystemBase {
   }
 
   public void putElevatorValuesInSmartDashboard() {
-    SmartDashboard.putNumber("Elevator Right Position", getRightEncoderPosition());
-    SmartDashboard.putNumber("Elevator Left Postion", getLeftEncoderPosition());
+    SmartDashboard.putBoolean("Elevator Limit Switch", touchingLimitSwitch());
+    SmartDashboard.putNumber("Elevator Right Encoder Position", rightMotorEncoder.getPosition());
+    SmartDashboard.putNumber("Elevator Left Encoder Position", leftMotorEncoder.getPosition());
+    SmartDashboard.putNumber("Elevator Right Amps", rightMotorEncoder.getVelocity());
+    SmartDashboard.putNumber("Elevator Left Amps", leftMotorEncoder.getVelocity());
+    SmartDashboard.putNumber("Elevator Right Amps", elevatorRightMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Elevator Left Amps", elevatorLeftMotor.getOutputCurrent());
   }
 
-  public void resetMotorsEncoderPosition() {
+  public void resetMotorsEncoderPositions() {
     leftMotorEncoder.setPosition(0);
     rightMotorEncoder.setPosition(0);
   }
@@ -117,16 +129,13 @@ public class Elevator extends SubsystemBase {
   //---------- ELEVATOR METHODS ----------//
   public void stopAllMotors() {
     elevatorRightMotor.stopMotor();
-    elevatorLeftMotor.stopMotor();
   }
 
   public void raiseElevator(double speed) {
-    elevatorLeftMotor.set(speed);
     elevatorRightMotor.set(speed);
   }
 
   public void lowerElevator(double speed) {
-    elevatorLeftMotor.set(-speed);
     elevatorRightMotor.set(-speed);
   }
 
@@ -135,61 +144,51 @@ public class Elevator extends SubsystemBase {
   /// BOOLEAN COMMANDS                                                                          ///
   ///                                                                                           ///
   ///////////////////////////////////////////////////////////////////////////////////////////////// 
+  public boolean touchingLimitSwitch() {
+    return !elevatorLimitSwitch.get();
+  }
+
   public boolean hasReachedLevel1() {
-    return Math.floor(leftMotorEncoder.getPosition()) == kLevel1EncoderPosition;
+    return Math.floor(rightMotorEncoder.getPosition()) == kLevel1EncoderPosition;
   }
 
   public boolean hasReachedLevel2() {
-    return Math.floor(leftMotorEncoder.getPosition()) == kLevel2EncoderPosition;
+    return Math.floor(rightMotorEncoder.getPosition()) == kLevel2EncoderPosition;
   }
 
   public boolean hasReachedLevel3() {
-    return Math.floor(leftMotorEncoder.getPosition()) == kLevel3EncoderPosition;
+    return Math.floor(rightMotorEncoder.getPosition()) == kLevel3EncoderPosition;
   }
 
   public boolean hasReachedHumanStation() {
-    return Math.floor(leftMotorEncoder.getPosition()) == kHumanStationEncoderPosition;
+    return Math.floor(rightMotorEncoder.getPosition()) == kHumanStationEncoderPosition;
   }
 
   public void goToLevel1() {
-    if(getRightEncoderPosition() < kLevel1EncoderPosition) {
-      rightClosedLoopController.setReference(kLevel1EncoderPosition, ControlType.kPosition);
-    } else
-      stopAllMotors();
+    rightClosedLoopController.setReference(kLevel1EncoderPosition, ControlType.kPosition);
   }
 
   public void goToLevel2() {
-    if(getRightEncoderPosition() < kLevel2EncoderPosition) {
-      rightClosedLoopController.setReference(kLevel2EncoderPosition, ControlType.kPosition);
-    } else
-      stopAllMotors();
+    rightClosedLoopController.setReference(kLevel2EncoderPosition, ControlType.kPosition);
   }
 
   public void goToLevel3() {
-    if(getRightEncoderPosition() < kLevel3EncoderPosition) {
-      rightClosedLoopController.setReference(kLevel3EncoderPosition, ControlType.kPosition);
-    } else
-      stopAllMotors();
+    rightClosedLoopController.setReference(kLevel3EncoderPosition, ControlType.kPosition);
   }
 
   public void goToHumanStation() {
-    if(getRightEncoderPosition() > kHumanStationEncoderPosition) {
-      rightClosedLoopController.setReference(kHumanStationEncoderPosition, ControlType.kPosition);
-    } else
-      stopAllMotors();
+    rightClosedLoopController.setReference(kHumanStationEncoderPosition, ControlType.kPosition);
   }
 
   public void lowerToStartPosition() {
-    if(getRightEncoderPosition() > kStartingPosition) {
-      rightClosedLoopController.setReference(kStartingPosition, ControlType.kPosition);
-    } else
-      stopAllMotors();
+    rightClosedLoopController.setReference(kStartingPosition, ControlType.kPosition);
   }
   
-
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    if (touchingLimitSwitch())
+      resetMotorsEncoderPositions();
+
     putElevatorValuesInSmartDashboard();// might not work
   }
 }

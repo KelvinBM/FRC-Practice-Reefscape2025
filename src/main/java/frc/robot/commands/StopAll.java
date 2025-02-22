@@ -29,7 +29,7 @@ public class StopAll extends Command {
   public void initialize() {
     algaeCollector.stopMotors();
     climber.stopAllMotors();
-    coralGrabber.stopAllMotors();
+    coralGrabber.stopMotors();
     elevator.stopAllMotors();
     System.out.println("STOPPED ALL");
   }

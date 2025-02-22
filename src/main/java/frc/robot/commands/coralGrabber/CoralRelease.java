@@ -6,8 +6,7 @@ import frc.robot.subsystems.CoralGrabber;
 
 public class CoralRelease extends Command {
     private CoralGrabber coralGrabber;
-    private double speed, timerStart;
-    private boolean finished;
+    private double speed;
 
     public CoralRelease(CoralGrabber coralGrabber, double speed) {
         this.coralGrabber = coralGrabber;
@@ -17,27 +16,20 @@ public class CoralRelease extends Command {
     }
 
     @Override
-    public void initialize() {
-        timerStart = Timer.getFPGATimestamp();
-        finished = false;
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
-        if(Timer.getFPGATimestamp() - timerStart <= 2)
-            coralGrabber.releaseCoral(speed);
-        else
-            finished = true;
+        coralGrabber.releaseCoral(speed);
     }
 
     @Override
     public void end(boolean interrupted) {
-        coralGrabber.stopLeftMotor();
-        coralGrabber.stopRightMotor();
+        coralGrabber.stopMotors();
     }
 
     @Override
     public boolean isFinished() {
-        return finished;
+        return false;
     }
 }

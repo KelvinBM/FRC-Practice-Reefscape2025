@@ -28,14 +28,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    Limelight.setLimelightPipeline(0);
+
     for(int port = 5800; port <= 5809; port++)
       PortForwarder.add(port, "limelight.local", port); // forwards to -> http://roborio-6593-frc.local:5801
   }
 
   @Override
   public void robotPeriodic() {
-    Limelight.putLimelightValuesInDashboard();
-    SmartDashboard.putBoolean("Has Target", true);
     SmartDashboard.updateValues();
 
     /*

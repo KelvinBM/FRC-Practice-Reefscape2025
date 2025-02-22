@@ -16,7 +16,7 @@ public class AlgaeLowerAndCollect extends Command {
 
   @Override
   public void initialize() {
-
+    
   }
 
   @Override

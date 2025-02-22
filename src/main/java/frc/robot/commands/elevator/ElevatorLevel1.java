@@ -18,13 +18,12 @@ public class ElevatorLevel1 extends Command {
     }
 
     @Override
-    public boolean isFinished() {
-        return elevator.hasReachedLevel1();
-    }
-
-    @Override
     public void end(boolean interrupted) {
         elevator.stopAllMotors();
     }
 
+    @Override
+    public boolean isFinished() {
+        return elevator.hasReachedLevel1();
+    }
 }

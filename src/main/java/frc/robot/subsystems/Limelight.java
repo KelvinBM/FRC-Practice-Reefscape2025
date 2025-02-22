@@ -20,39 +20,41 @@ public class Limelight extends SubsystemBase {
   static NetworkTableEntry ta = table.getEntry("ta");
   static NetworkTableEntry tv = table.getEntry("tv");
 
+  public final static double PIPELINE_APRIL_TAGS = 1;
+
   /** Creates a new Limelight. */
   public Limelight() {}
 
-  public void setLimelightPipeline(double pipelineNumber) {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").setDouble(1);
+  public static void setLimelightPipeline(double pipelineNumber) {
+    table.getEntry("pipeline").setDouble(pipelineNumber);
   }
 
-  public static double getTableValue(String tablentry) {
+  public static double getTableValueDouble(String tablentry) {
     switch(tablentry) {
       case "tx":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0.0);
+        return table.getEntry("tx").getDouble(0.0);
       case "ta":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0.0);
+        return table.getEntry("ta").getDouble(0.0);
       case "ty":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0.0);
+        return table.getEntry("ty").getDouble(0.0);
       case "tv":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0.0);
+        return table.getEntry("tv").getDouble(0.0);
       case "pipeline":
-        return NetworkTableInstance.getDefault().getTable("limelight").getEntry("pipeline").getDouble(0.0);
+        return table.getEntry("pipeline").getDouble(0.0);
       default:
         return 0;
     }
   }
 
   public static boolean hasValidTarget() {
-    return (getTableValue("tv") == 1) ? true : false;
+    return (getTableValueDouble("tv") == 1) ? true : false;
   }
 
 
 
   public static double getTargetDistance() {
 
-    double angleToGoalDegrees = Constants.LimelightConstants.CAMERA_MOUNT_ANGLE_DEG + getTableValue("ty");
+    double angleToGoalDegrees = Constants.LimelightConstants.CAMERA_MOUNT_ANGLE_DEG + getTableValueDouble("ty");
     double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180);
     double distanceFromLimelightToGoalInches = (Constants.LimelightConstants.GOAL_HEIGHT_INCHES - Constants.LimelightConstants.CAMERA_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);
 
@@ -73,10 +75,10 @@ public class Limelight extends SubsystemBase {
   }
 
   public static void putLimelightValuesInDashboard() {
-    SmartDashboard.putNumber("Limelight Y", getTableValue("ty"));
+    SmartDashboard.putNumber("Limelight Y", getTableValueDouble("ty"));
     SmartDashboard.putNumber("LimelightHelpers Y", LimelightHelpers.getLimelightNTDouble("limelight", "ty"));
-    SmartDashboard.putNumber("Limelight X", getTableValue("tx"));
-    SmartDashboard.putNumber("Limelight Area", getTableValue("ta"));
+    SmartDashboard.putNumber("Limelight X", getTableValueDouble("tx"));
+    SmartDashboard.putNumber("Limelight Area", getTableValueDouble("ta"));
     SmartDashboard.putBoolean("Has Target", hasValidTarget());
     SmartDashboard.putNumber("Target Distance", getTargetDistance());
     SmartDashboard.putNumber("Distance (Limelight Helpers)", getTargetDistanceUsingLimelightHelper());
@@ -84,6 +86,6 @@ public class Limelight extends SubsystemBase {
   
   @Override
   public void periodic() {
-    // putLimelightValuesInDashboard(); // doesn't put values in smartdashboard -> periodic works for methods relating directly to subsystem
+    putLimelightValuesInDashboard(); // doesn't put values in smartdashboard -> periodic works for methods relating directly to subsystem
   }
 }

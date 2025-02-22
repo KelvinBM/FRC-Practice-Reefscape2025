@@ -11,15 +11,13 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeCollectorConstants;
 
 public class AlgaeCollector extends SubsystemBase {
     // algae position constants
-    private final double kLowerPosition = 13.5;// 16.5
+    private final double kLowerPosition = 13.5;// 13.5
     private final double kStartPosition = 1; // offset start
-    private final double kHumanStationPosition = 0;
 
     
     private SparkMax algaeAdjusterMotor = new SparkMax(AlgaeCollectorConstants.ALGAE_ADJUSTER_MOTOR_ID, MotorType.kBrushless);
@@ -36,10 +34,16 @@ public class AlgaeCollector extends SubsystemBase {
     private DigitalInput beamBreaker = new DigitalInput(AlgaeCollectorConstants.ALGAE_COLLECTOR_LIMIT_SWITCH_PORT);
 
     public AlgaeCollector() {
-        adjusterConfig.idleMode(IdleMode.kBrake);
+        adjusterConfig.inverted(false)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(30);
         collectorConfig.inverted(true)
-            .idleMode(IdleMode.kCoast);
-        adjusterConfig.closedLoop.p(0.2);
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(30);
+
+        adjusterConfig.closedLoop
+            .p(0.1)
+            .outputRange(-0.3, 0.4);
 
         algaeAdjusterMotor.configure(adjusterConfig, null, null);
         algaeCollectorMotor.configure(collectorConfig, null, null);
@@ -56,10 +60,7 @@ public class AlgaeCollector extends SubsystemBase {
     }
 
     public void collectAlgae(double speed) {
-        if(!hasAlgae())
-            algaeCollectorMotor.set(speed);
-        if(hasAlgae())
-            algaeCollectorMotor.stopMotor();
+        algaeCollectorMotor.set(speed);
     }
 
     public void releaseAlgae(double speed) {
@@ -90,11 +91,11 @@ public class AlgaeCollector extends SubsystemBase {
 
     /////////////////////////////// BOOLEAN ///////////////////////////////
     public boolean atStartPosition() {
-        return Math.round(getAdjusterPosition()) == kStartPosition || (getAdjusterPosition() > kStartPosition - 1 || getAdjusterPosition() < kStartPosition + 1);
+        return getAdjusterPositionFloored() == kStartPosition;
     }
 
     public boolean atPickUpPosition() {
-        return Math.round(getAdjusterPosition()) == kLowerPosition || (getAdjusterPosition() > kLowerPosition - 1 || getAdjusterPosition() < kLowerPosition + 1);
+        return getAdjusterPositionFloored() == Math.floor(kLowerPosition); // modify
     }
 
     public boolean hasAlgaeAtStart() {
@@ -103,6 +104,10 @@ public class AlgaeCollector extends SubsystemBase {
 
     public double getAdjusterPosition() {
         return adjusterEncoder.getPosition();
+    }
+
+    public double getAdjusterPositionFloored() {
+        return Math.floor(adjusterEncoder.getPosition());
     }
 
     public void lowerAlgaeAndCollect(double collectorSpeed) {
@@ -117,11 +122,8 @@ public class AlgaeCollector extends SubsystemBase {
     }
 
     public void lowerToCollect() {
-        if(getAdjusterPosition() != kLowerPosition) {
+        if(getAdjusterPositionFloored() != kLowerPosition) {
             adjusterClosedLoopController.setReference(kLowerPosition, ControlType.kPosition);
-        }
-        if(getAdjusterPosition() == kLowerPosition) {
-            algaeAdjusterMotor.stopMotor();
         }
     }
 
@@ -129,13 +131,6 @@ public class AlgaeCollector extends SubsystemBase {
         if(getAdjusterPosition() != kStartPosition)
             adjusterClosedLoopController.setReference(kStartPosition, ControlType.kPosition);
         else if(getAdjusterPosition() == kStartPosition)
-            algaeAdjusterMotor.stopMotor();
-    }
-
-    public void adjustAlgaeToHuman() {
-        if(getAdjusterPosition() != kHumanStationPosition) {
-            adjusterClosedLoopController.setReference(kHumanStationPosition, ControlType.kPosition);
-        } else if(getAdjusterPosition() == kHumanStationPosition)
             algaeAdjusterMotor.stopMotor();
     }
 

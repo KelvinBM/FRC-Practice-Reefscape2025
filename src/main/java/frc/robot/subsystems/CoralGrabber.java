@@ -22,10 +22,6 @@ public class CoralGrabber extends SubsystemBase {
   private SparkMax coralRightMotor = new SparkMax(CoralGrabberConstants.CORAL_MOTOR_RIGHT_ID, MotorType.kBrushless);
   private SparkMax coralLeftMotor = new SparkMax(CoralGrabberConstants.CORAL_MOTOR_LEFT_ID, MotorType.kBrushless);
 
-  // encoders
-  // private RelativeEncoder coralAdjustEncoder = coralAdjustMotor.getEncoder();
-  private RelativeEncoder coralRightEncoder = coralRightMotor.getEncoder();// may not be needed
-  private RelativeEncoder coralLeftEncoder = coralLeftMotor.getEncoder();// may not be needed
 
   // configs
   // private SparkMaxConfig coralAdjustConfig = new SparkMaxConfig();
@@ -47,11 +43,12 @@ public class CoralGrabber extends SubsystemBase {
 
     coralRightConfig.inverted(true)// may have to change to false
         .idleMode(IdleMode.kCoast)
-        .smartCurrentLimit(25)
-        .follow(coralLeftMotor);
+        .smartCurrentLimit(30);
+ 
     coralLeftConfig.inverted(false)// may have to change to true
         .idleMode(IdleMode.kCoast)
-        .smartCurrentLimit(25);
+        .smartCurrentLimit(30)
+        .follow(coralRightMotor);
 
         
     coralRightConfig.closedLoop
@@ -62,44 +59,12 @@ public class CoralGrabber extends SubsystemBase {
         .outputRange(-1, 1);
 
     // coralAdjustMotor.configure(coralAdjustConfig,
-    //     ResetMode.kNoResetSafeParameters,
-    //     PersistMode.kPersistParameters);
+    // ResetMode.kNoResetSafeParameters,
+    // PersistMode.kPersistParameters);
     coralRightMotor.configure(coralRightConfig, null, null);
     coralLeftMotor.configure(coralLeftConfig, null, null);
   }
 
-
-  public void setMotorsToCoast() {
-    coralRightConfig.idleMode(IdleMode.kCoast);
-    coralLeftConfig.idleMode(IdleMode.kCoast);
-
-    coralRightMotor.configure(coralRightConfig,
-        null,
-        null);
-    coralLeftMotor.configure(coralLeftConfig,
-        null,
-        null);
-  }
-
-  public void setMotorsToBrake() {
-    coralRightConfig.idleMode(IdleMode.kBrake);
-    coralLeftConfig.idleMode(IdleMode.kBrake);
-
-    coralRightMotor.configure(coralRightConfig,
-        null,
-        null);
-    coralLeftMotor.configure(coralLeftConfig,
-        null,
-        null);
-  }
-
-  public void resetRightEncoderPosition() {
-    coralRightEncoder.setPosition(0);
-  }
-
-  public void resetLeftEncoderPosition() {
-    coralLeftEncoder.setPosition(0);
-  }
 
   // sensor boolean methods
   public boolean hasCoral() {
@@ -108,28 +73,22 @@ public class CoralGrabber extends SubsystemBase {
 
   public void grabCoral(double speed) {
     if (!hasCoral()) {
-      coralLeftMotor.set(speed);
       coralRightMotor.set(speed);
     }
-    else if (hasCoral()) {
-      stopAllMotors();
+    if (hasCoral()) {
+      stopMotors();
     }
   }
 
   public void releaseCoral(double speed) {
-    coralLeftMotor.set(-speed);
+    coralRightMotor.set(speed);
+  }
+
+  public void returnCoral(double speed) {
     coralRightMotor.set(-speed);
   }
 
-  public void stopRightMotor() {
-    coralRightMotor.stopMotor();
-  }
-
-  public void stopLeftMotor() {
-    coralLeftMotor.stopMotor();
-  }
-
-  public void stopAllMotors() {
+  public void stopMotors() {
     coralRightMotor.stopMotor();
     coralLeftMotor.stopMotor();
   }
@@ -138,6 +97,6 @@ public class CoralGrabber extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // SmartDashboard.putNumber("CoralGrabber Adjuster Position", coralAdjustEncoder.getPosition());
-    SmartDashboard.putBoolean("Has Coral", coralBeamBreaker.get());
+    SmartDashboard.putBoolean("Has Coral", hasCoral());
   }
 }

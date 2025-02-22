@@ -40,6 +40,7 @@ public final class Constants {
     public static final class ElevatorConstants {
         public static final int ELEVATOR_TOP_MOTOR_ID = 31;
         public static final int ELEVATOR_BOTTOM_MOTOR_ID = 32;
+        public static final int ELEVATOR_LIMIT_SWITCH_PORT = 3;// DIO port 3
     }
 
     public static final class OperatorConstants {

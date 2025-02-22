@@ -238,7 +238,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param driveRobotCentric
      * @param desiredDistance
      * @param speed
-     * @return
+     * @return a command that gets in range of the a specified target(currently april tags)
      */
     public Command getInRange(SwerveRequest.RobotCentric driveRobotCentric, double desiredDistance, double speed) {
         return run(() -> {
@@ -271,7 +271,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 System.out.println("Target acquired --> align robot");
                 double distanceWithOffset = desiredDistanceFromTags + 5;
         
-                if(Limelight.getTableValue("tx") > 5) { // verify if working correctly
+                if(Limelight.getTableValueDouble("tx") > 5) { // verify if working correctly
                     this.applyRequest(() -> 
                         driveRobotCentric
                             .withRotationalRate(0.15)
@@ -291,7 +291,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                         );
                     }
                 }
-                if(Limelight.getTableValue("tx") < 5) { // verify if working correctly
+                if(Limelight.getTableValueDouble("tx") < 5) { // verify if working correctly
                     this.applyRequest(() -> 
                         driveRobotCentric
                             .withRotationalRate(0.15)

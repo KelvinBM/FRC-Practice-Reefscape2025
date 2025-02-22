@@ -21,8 +21,7 @@ public class CoralGrab extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        coralGrabber.stopLeftMotor();
-        coralGrabber.stopRightMotor();
+        coralGrabber.stopMotors();
     }
 
     @Override
