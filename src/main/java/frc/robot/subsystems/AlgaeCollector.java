@@ -33,13 +33,12 @@ public class AlgaeCollector extends SubsystemBase {
     // closedloop for controlling motor
     private SparkClosedLoopController adjusterClosedLoopController = algaeAdjusterMotor.getClosedLoopController();
 
-    private DigitalInput beamBreaker = new DigitalInput(AlgaeCollectorConstants.ALGEA_BEAM_BREAKER_PORT);
-    private DigitalInput algaeCollectorLimitSwitch = new DigitalInput(AlgaeCollectorConstants.ALGAE_COLLECTOR_LIMIT_SWITCH_PORT);
+    private DigitalInput beamBreaker = new DigitalInput(AlgaeCollectorConstants.ALGAE_COLLECTOR_LIMIT_SWITCH_PORT);
 
     public AlgaeCollector() {
         adjusterConfig.idleMode(IdleMode.kBrake);
         collectorConfig.inverted(true)
-            .idleMode(IdleMode.kBrake);
+            .idleMode(IdleMode.kCoast);
         adjusterConfig.closedLoop.p(0.2);
 
         algaeAdjusterMotor.configure(adjusterConfig, null, null);
@@ -53,7 +52,7 @@ public class AlgaeCollector extends SubsystemBase {
     }
 
     public boolean hasAlgae() {
-        return !algaeCollectorLimitSwitch.get();// returns opposite, !limitSwitch.get() ==> false
+        return !beamBreaker.get();// returns opposite, !limitSwitch.get() ==> false
     }
 
     public void collectAlgae(double speed) {
@@ -91,15 +90,19 @@ public class AlgaeCollector extends SubsystemBase {
 
     /////////////////////////////// BOOLEAN ///////////////////////////////
     public boolean atStartPosition() {
-        return getAdjusterPosition() == kStartPosition;
+        return Math.round(getAdjusterPosition()) == kStartPosition || (getAdjusterPosition() > kStartPosition - 1 || getAdjusterPosition() < kStartPosition + 1);
     }
 
     public boolean atPickUpPosition() {
-        return getAdjusterPosition() == kLowerPosition;
+        return Math.round(getAdjusterPosition()) == kLowerPosition || (getAdjusterPosition() > kLowerPosition - 1 || getAdjusterPosition() < kLowerPosition + 1);
+    }
+
+    public boolean hasAlgaeAtStart() {
+        return hasAlgae() && atStartPosition();
     }
 
     public double getAdjusterPosition() {
-        return Math.floor(adjusterEncoder.getPosition());
+        return adjusterEncoder.getPosition();
     }
 
     public void lowerAlgaeAndCollect(double collectorSpeed) {
@@ -107,7 +110,7 @@ public class AlgaeCollector extends SubsystemBase {
             algaeCollectorMotor.set(collectorSpeed);
             adjusterClosedLoopController.setReference(kLowerPosition, ControlType.kPosition);
         }
-        else if(hasAlgae()){
+        if(hasAlgae()){
             adjusterClosedLoopController.setReference(kStartPosition, ControlType.kPosition);
             algaeCollectorMotor.stopMotor();
         }

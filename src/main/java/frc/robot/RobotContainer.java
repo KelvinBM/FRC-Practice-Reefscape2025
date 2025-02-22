@@ -68,7 +68,7 @@ public class RobotContainer {
     //                             algeaAllInOne, algeaRelease, coralGrab, coralRelease, 
     //                             stopAll;
     private final JoystickButton stopAll, raiseElevator, lowerElevator, elevatorL1, elevatorL2, elevatorL3,
-                                 climb, lowerRobot, algaePickup, algaeRelease, algaeLower, algaeRaise, 
+                                 climb, lowerRobot, algaePickup, algaeRelease, algaeLowerAndCollect, algaeRaise, 
                                  coralGrab, coralRelease;
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -91,21 +91,22 @@ public class RobotContainer {
         elevatorL1 = new JoystickButton(buttonBoard, OperatorConstants.PORT_1);// 1
         elevatorL2 = new JoystickButton(buttonBoard, OperatorConstants.PORT_2);// 2
         elevatorL3 = new JoystickButton(buttonBoard, OperatorConstants.PORT_3);// 3
-        raiseElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);// 4
-        lowerElevator = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);// 5
+
+        raiseElevator = new JoystickButton(buttonBoard, 14);// 4
+        lowerElevator = new JoystickButton(buttonBoard, 15);// 5
 
 
         climb = new JoystickButton(buttonBoard, OperatorConstants.PORT_7); 
         lowerRobot = new JoystickButton(buttonBoard, OperatorConstants.PORT_8);// 9 
 
-        algaePickup = new JoystickButton(buttonBoard, 14);// 8
-        algaeRelease = new JoystickButton(buttonBoard, 15);// 10
+        algaePickup = new JoystickButton(buttonBoard, OperatorConstants.PORT_4);// 8
+        algaeRelease = new JoystickButton(buttonBoard, OperatorConstants.PORT_5);// 10
 
-        algaeLower = new JoystickButton(buttonBoard, 21);// 9
-        algaeRaise = new JoystickButton(buttonBoard, 20);// 10
+        algaeLowerAndCollect = new JoystickButton(buttonBoard, 21);// 9
+        algaeRaise = new JoystickButton(buttonBoard, OperatorConstants.PORT_6);// 10
 
-        coralGrab = new JoystickButton(buttonBoard, 50);// 4
-        coralRelease = new JoystickButton(buttonBoard, 51);// 5
+        coralGrab = new JoystickButton(buttonBoard, 51);// 4
+        coralRelease = new JoystickButton(buttonBoard, 52);// 5
 
         // STOP ALL //        
         stopAll = new JoystickButton(buttonBoard, OperatorConstants.PORT_10);
@@ -134,8 +135,8 @@ public class RobotContainer {
         // BUTTON BOARD //
         stopAll.onTrue(new StopAll(algaeCollector, climber, coralGrabber, elevator));
 
-        raiseElevator.whileTrue(new RaiseElevator(elevator, 0.2));
-        lowerElevator.whileTrue(new LowerElevator(elevator, 0.2));
+        // raiseElevator.whileTrue(new RaiseElevator(elevator, 0.2));
+        // lowerElevator.whileTrue(new LowerElevator(elevator, 0.2));
         
         elevatorL1.onTrue(new ElevatorLevel1(elevator));
         elevatorL2.onTrue(new ElevatorLevel2(elevator));
@@ -143,17 +144,22 @@ public class RobotContainer {
 
 
         // CORAL
-        coralGrab.onTrue(new CoralGrab(coralGrabber, 0.1));
-        coralRelease.onTrue(new CoralRelease(coralGrabber, 0.1));
+        // coralGrab.onTrue(new CoralGrab(coralGrabber, 0.1));
+        // coralRelease.onTrue(new CoralRelease(coralGrabber, 0.1));
+        joystick.rightBumper().whileTrue(new CoralGrab(coralGrabber, 0.15));
+        joystick.leftBumper().whileTrue(new CoralRelease(coralGrabber, 0.15));
+
 
         // CLIMBER
-        climb.whileTrue(new Climb(climber));
-        lowerElevator.whileTrue(new LowerRobot(climber));
+        climb.whileTrue(new Climb(climber, 0.15, -0.25));
+        lowerElevator.whileTrue(new LowerRobot(climber, -0.15, 0.25));
 
         // ALGAE
-        joystick.x().whileTrue(new CollectAlgae(algaeCollector, 0.15));
-        joystick.a().onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.20));
-        joystick.b().onTrue(new ReleaseAlgae(algaeCollector, 0.20));
+        algaeLowerAndCollect.onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.1));
+        algaeRelease.onTrue(new ReleaseAlgae(algaeCollector, 0.2).withTimeout(0.25));
+        // joystick.x().whileTrue(new CollectAlgae(algaeCollector, 0.15));
+        // joystick.a().onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.20));
+        // joystick.b().onTrue(new ReleaseAlgae(algaeCollector, 0.20));
 
 
         // l1.onTrue(new)
