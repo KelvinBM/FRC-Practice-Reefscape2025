@@ -1,6 +1,5 @@
 package frc.robot.commands.coralGrabber;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralGrabber;
 

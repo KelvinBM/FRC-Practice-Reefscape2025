@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.StopAll;
-import frc.robot.commands.algaeCollector.AlgaeAdjustToStart;
 import frc.robot.commands.algaeCollector.AlgaeLowerAndCollect;
 import frc.robot.commands.algaeCollector.ReleaseAlgae;
 import frc.robot.commands.climber.Climb;
@@ -150,7 +149,7 @@ public class RobotContainer {
 
         // CLIMBER
         climb.whileTrue(new Climb(climber, 0.15, -0.25));
-        lowerElevator.whileTrue(new LowerRobot(climber, 0.30, .30));
+        lowerElevator.whileTrue(new LowerRobot(climber, .30));
 
         // ALGAE
         algaeLowerAndCollect.onTrue(new AlgaeLowerAndCollect(algaeCollector, 0.1));

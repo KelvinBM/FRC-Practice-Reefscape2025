@@ -10,13 +10,12 @@ import frc.robot.subsystems.Climber;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class LowerRobot extends Command {
   private Climber climber;
-  private double adjusterSpeed, ropePullerSpeed;
+  private double ropePullerSpeed;
 
   /** Creates a new Lower. */
-  public LowerRobot(Climber climber, double adjusterSpeed, double ropePullerSpeed) {
+  public LowerRobot(Climber climber, double ropePullerSpeed) {
     this.climber = climber;
     this.ropePullerSpeed = ropePullerSpeed;
-    this.adjusterSpeed = adjusterSpeed;
 
     addRequirements(climber);
   }
