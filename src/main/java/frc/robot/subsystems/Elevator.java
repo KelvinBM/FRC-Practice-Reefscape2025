@@ -8,6 +8,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.config.MAXMotionConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -31,21 +32,20 @@ public class Elevator extends SubsystemBase {
   private final double kP = 0.001;
 
   // motors
-  private SparkMax elevatorLeftMotor = new SparkMax(ElevatorConstants.ELEVATOR_TOP_MOTOR_ID, MotorType.kBrushless);
-  private SparkMax elevatorRightMotor = new SparkMax(ElevatorConstants.ELEVATOR_BOTTOM_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax leftMotor = new SparkMax(ElevatorConstants.ELEVATOR_TOP_MOTOR_ID, MotorType.kBrushless);
+  private SparkMax rightMotor = new SparkMax(ElevatorConstants.ELEVATOR_BOTTOM_MOTOR_ID, MotorType.kBrushless);
 
   // configs
-  private SparkMaxConfig elevatorRightConfig = new SparkMaxConfig();
-  private SparkMaxConfig elevatorLeftConfig = new SparkMaxConfig();
+  private SparkMaxConfig rightConfig = new SparkMaxConfig();
+  private SparkMaxConfig leftConfig = new SparkMaxConfig();
 
   // encoders
-  private RelativeEncoder rightMotorEncoder = elevatorRightMotor.getEncoder();
-  private RelativeEncoder leftMotorEncoder = elevatorLeftMotor.getEncoder();
+  private RelativeEncoder rightEncoder = rightMotor.getEncoder();
+  private RelativeEncoder leftEncoder = leftMotor.getEncoder();
 
   // closedloop
-  private SparkClosedLoopController rightClosedLoopController =  elevatorRightMotor.getClosedLoopController();
-  private SparkClosedLoopController leftClosedLoopController =  elevatorLeftMotor.getClosedLoopController();
-
+  private SparkClosedLoopController rightClosedLoopController =  rightMotor.getClosedLoopController();
+  private SparkClosedLoopController leftClosedLoopController =  leftMotor.getClosedLoopController();
 
   // limit switch
   private DigitalInput elevatorLimitSwitch = new DigitalInput(ElevatorConstants.ELEVATOR_LIMIT_SWITCH_PORT);
@@ -56,62 +56,73 @@ public class Elevator extends SubsystemBase {
     // setToBrakeMode();
     resetMotorsEncoderPositions();
     elevatorMotorConfigs();
-    rightMotorEncoder.setPosition(0);
-    leftMotorEncoder.setPosition(0);
+    rightEncoder.setPosition(0);
+    leftEncoder.setPosition(0);
   }
 
   public void elevatorMotorConfigs() {
-    elevatorRightMotor.clearFaults();
-    elevatorLeftMotor.clearFaults();
+    rightMotor.clearFaults();
+    leftMotor.clearFaults();
 
-    elevatorRightConfig.closedLoop
-      .p(0.1);
+    MAXMotionConfig motionConfig = new MAXMotionConfig();
 
-    elevatorLeftConfig.closedLoop
-      .p(0.1);
+    // SmartMotion Config = similar result as trapezoidal profiling
+    motionConfig.maxAcceleration(0.1)
+      .maxVelocity(0.6);
 
-    elevatorRightConfig.inverted(false)
+    rightConfig.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .p(0.1)
+      .maxMotion.apply(motionConfig);// applied through closedLoop's maxMotion config
+
+    leftConfig.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .p(0.1)
+      .smartMotion
+        .maxAcceleration(kHumanStationEncoderPosition);
+
+    rightConfig.inverted(false)
       .smartCurrentLimit(40)
-      .follow(elevatorRightMotor);
+      .follow(rightMotor);
 
-    elevatorLeftConfig.inverted(true)
+    leftConfig.inverted(true)
       .smartCurrentLimit(40);
 
-    elevatorRightMotor.configure(elevatorRightConfig, null, null);
-    elevatorLeftMotor.configure(elevatorLeftConfig, null, null);
+    rightMotor.configure(rightConfig, null, null);
+    leftMotor.configure(leftConfig, null, null);
   }
 
   public void setToBrakeMode() {
-    elevatorRightConfig.idleMode(IdleMode.kBrake);
-    elevatorLeftConfig.idleMode(IdleMode.kBrake);
+    rightConfig.idleMode(IdleMode.kBrake);
+    leftConfig.idleMode(IdleMode.kBrake);
   }
 
   public void setToCoastMode() {
-    elevatorRightConfig.idleMode(IdleMode.kCoast);
-    elevatorLeftConfig.idleMode(IdleMode.kCoast);
+    rightConfig.idleMode(IdleMode.kCoast);
+    leftConfig.idleMode(IdleMode.kCoast);
   }
 
   public double getRightEncoderPosition() {
-    return Math.floor(rightMotorEncoder.getPosition());
+    return Math.floor(rightEncoder.getPosition());
   }
 
   public double getLeftEncoderPosition() {
-    return Math.floor(leftMotorEncoder.getPosition());
+    return Math.floor(leftEncoder.getPosition());
   }
 
   public void putElevatorValuesInSmartDashboard() {
     SmartDashboard.putBoolean("Elevator Limit Switch", touchingLimitSwitch());
-    SmartDashboard.putNumber("Elevator Right Encoder Position", rightMotorEncoder.getPosition());
-    SmartDashboard.putNumber("Elevator Left Encoder Position", leftMotorEncoder.getPosition());
-    SmartDashboard.putNumber("Elevator Right Amps", rightMotorEncoder.getVelocity());
-    SmartDashboard.putNumber("Elevator Left Amps", leftMotorEncoder.getVelocity());
-    SmartDashboard.putNumber("Elevator Right Amps", elevatorRightMotor.getOutputCurrent());
-    SmartDashboard.putNumber("Elevator Left Amps", elevatorLeftMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Elevator Right Encoder Position", rightEncoder.getPosition());
+    SmartDashboard.putNumber("Elevator Left Encoder Position", leftEncoder.getPosition());
+    SmartDashboard.putNumber("Elevator Right Amps", rightEncoder.getVelocity());
+    SmartDashboard.putNumber("Elevator Left Amps", leftEncoder.getVelocity());
+    SmartDashboard.putNumber("Elevator Right Amps", rightMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Elevator Left Amps", leftMotor.getOutputCurrent());
   }
 
   public void resetMotorsEncoderPositions() {
-    leftMotorEncoder.setPosition(0);
-    rightMotorEncoder.setPosition(0);
+    leftEncoder.setPosition(0);
+    rightEncoder.setPosition(0);
   }
   
   /***** PID for elevator method *****/
@@ -128,15 +139,15 @@ public class Elevator extends SubsystemBase {
 
   //---------- ELEVATOR METHODS ----------//
   public void stopAllMotors() {
-    elevatorRightMotor.stopMotor();
+    rightMotor.stopMotor();
   }
 
   public void raiseElevator(double speed) {
-    elevatorRightMotor.set(speed);
+    rightMotor.set(speed);
   }
 
   public void lowerElevator(double speed) {
-    elevatorRightMotor.set(-speed);
+    rightMotor.set(-speed);
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,19 +160,19 @@ public class Elevator extends SubsystemBase {
   }
 
   public boolean hasReachedLevel1() {
-    return Math.floor(rightMotorEncoder.getPosition()) == kLevel1EncoderPosition;
+    return Math.floor(rightEncoder.getPosition()) == kLevel1EncoderPosition;
   }
 
   public boolean hasReachedLevel2() {
-    return Math.floor(rightMotorEncoder.getPosition()) == kLevel2EncoderPosition;
+    return Math.floor(rightEncoder.getPosition()) == kLevel2EncoderPosition;
   }
 
   public boolean hasReachedLevel3() {
-    return Math.floor(rightMotorEncoder.getPosition()) == kLevel3EncoderPosition;
+    return Math.floor(rightEncoder.getPosition()) == kLevel3EncoderPosition;
   }
 
   public boolean hasReachedHumanStation() {
-    return Math.floor(rightMotorEncoder.getPosition()) == kHumanStationEncoderPosition;
+    return Math.floor(rightEncoder.getPosition()) == kHumanStationEncoderPosition;
   }
 
   public void goToLevel1() {
